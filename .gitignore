@@ -1,0 +1,29 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Eclipse
+.metadata
+.settings
+.classpath
+.project
+
+# Gradle
+.gradle
+!gradle-wrapper.jar
+
+# Maven
+target
+
+# Build
+out
+build
+bin
+RemoteSystemsTempFiles
+
+# Other
+*.log
+*.swp
+*.bak

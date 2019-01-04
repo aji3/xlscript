@@ -1,0 +1,47 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.8.1'
+    id "com.jfrog.bintray" version "1.7.3"
+}
+
+apply plugin: 'java'
+
+group = 'org.xlbean'
+archivesBaseName = 'xlscript'
+version = '0.1.0'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+repositories {
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+	compile group: 'org.xlbean', name: 'xlbean', version:'0.2.2'
+	
+	compile group: 'org.codehaus.groovy', name: 'groovy-jsr223', version: '2.5.5'
+    
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.hamcrest:hamcrest-all:1.3'
+    
+}
+
+apply plugin: 'maven'
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file://C:/Users/tanikawa/.m2/repository")
+        }
+    }
+}
