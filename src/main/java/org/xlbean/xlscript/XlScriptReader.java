@@ -2,6 +2,7 @@ package org.xlbean.xlscript;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Comparator;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.xlbean.XlBean;
@@ -15,14 +16,31 @@ import org.xlbean.definition.ExcelR1C1DefinitionLoader;
 import org.xlbean.definition.TableDefinition;
 import org.xlbean.reader.XlBeanReader;
 import org.xlbean.reader.XlBeanReaderContext;
+import org.xlbean.util.Accessors;
 import org.xlbean.util.XlBeanFactory;
 import org.xlbean.xlscript.config.NoValidationXlBeanFactory;
+import org.xlbean.xlscript.processor.AbstractXlScriptProcessor;
 import org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor;
 import org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor;
 
 /**
  * Extends {@link XlBeanReader} to add function to evaluate XlBean values as
  * Groovy script on read.
+ * 
+ * <p>
+ * It loads all the values from excel file first then evaluate script. It means
+ * that all values in excel are accessible when evaluating script.
+ * </p>
+ * 
+ * <p>
+ * This class has static initializer for the following initialization:
+ * <ol>
+ * <li>Set NoValidationXlBeanFactory: to set any type of evaluated value to
+ * XlBean</li>
+ * <li>Set Accessors#noNullValue flag to false: to allow null value for XlBean
+ * because keys are required for Groovy script to be compiled properly.</li>
+ * </ol>
+ * </p>
  * 
  * @author tanikawa
  *
@@ -31,23 +49,30 @@ public class XlScriptReader extends XlBeanReader {
 
     static {
         XlBeanFactory.setInstance(new NoValidationXlBeanFactory());
+        Accessors.setInstance(new Accessors(false));
     }
 
+    private XlBeanReader reader;
     private XlScriptSingleDefinitionProcessor singleDefinitionProcessor = new XlScriptSingleDefinitionProcessor();
     private XlScriptTableDefinitionProcessor tableDefinitionProcessor = new XlScriptTableDefinitionProcessor();
 
-    private XlBeanReader reader;
-
+    /**
+     * Constructor which uses {@link XlBeanReader} to read excel file.
+     */
     public XlScriptReader() {
         this(new XlBeanReader());
     }
 
+    /**
+     * Constructor which uses given {@code reader} to read excel file.
+     */
     public XlScriptReader(XlBeanReader reader) {
         this.reader = reader;
     }
 
     /**
-     * 
+     * Read {@code excelFile} by using {@link XlBeanReader} instance set by
+     * constructor, then evaluate all the values in {@link XlBean}.
      */
     @Override
     public XlBean read(File excelFile) {
@@ -56,6 +81,10 @@ public class XlScriptReader extends XlBeanReader {
         return context.getXlBean();
     }
 
+    /**
+     * Read {@code in} by using {@link XlBeanReader} instance set by constructor,
+     * then evaluate all the values in {@link XlBean}.
+     */
     @Override
     public XlBean read(InputStream in) {
         XlBeanReaderContext context = reader.readContext(in);
@@ -63,6 +92,11 @@ public class XlScriptReader extends XlBeanReader {
         return context.getXlBean();
     }
 
+    /**
+     * Read {@code definitionSource} and {@code dataSource} by using
+     * {@link XlBeanReader} instance set by constructor, then evaluate all the
+     * values in {@link XlBean}.
+     */
     @Override
     public XlBean read(Object definitionSource, Workbook dataSource) {
         XlBeanReaderContext context = reader.readContext(definitionSource, dataSource);
@@ -70,6 +104,10 @@ public class XlScriptReader extends XlBeanReader {
         return context.getXlBean();
     }
 
+    /**
+     * Read {@code excelFile} by using {@link XlBeanReader} instance set by
+     * constructor, then evaluate all the values in {@link XlBean}.
+     */
     @Override
     public XlBeanReaderContext readContext(File excelFile) {
         XlBeanReaderContext context = reader.readContext(excelFile);
@@ -77,6 +115,10 @@ public class XlScriptReader extends XlBeanReader {
         return context;
     }
 
+    /**
+     * Read {@code in} by using {@link XlBeanReader} instance set by constructor,
+     * then evaluate all the values in {@link XlBean}.
+     */
     @Override
     public XlBeanReaderContext readContext(InputStream in) {
         XlBeanReaderContext context = reader.readContext(in);
@@ -84,6 +126,11 @@ public class XlScriptReader extends XlBeanReader {
         return context;
     }
 
+    /**
+     * Read {@code definitionSource} and {@code dataSource} by using
+     * {@link XlBeanReader} instance set by constructor, then evaluate all the
+     * values in {@link XlBean}.
+     */
     @Override
     public XlBeanReaderContext readContext(Object definitionSource, Workbook dataSource) {
         XlBeanReaderContext context = reader.readContext(definitionSource, dataSource);
@@ -94,14 +141,17 @@ public class XlScriptReader extends XlBeanReader {
     private void processAll(XlBeanReaderContext context) {
         XlBean bean = context.getXlBean();
         Definitions definitions = context.getDefinitions();
-        definitions.forEach(definition -> process(definition, bean));
+        definitions
+            .stream()
+            .sorted(Comparator.comparing(AbstractXlScriptProcessor::getScriptOrder))
+            .forEach(definition -> getProcessor(definition).process(definition, bean));
     }
 
-    private void process(Definition definition, XlBean bean) {
+    private AbstractXlScriptProcessor getProcessor(Definition definition) {
         if (definition instanceof TableDefinition) {
-            tableDefinitionProcessor.process(definition, bean);
+            return tableDefinitionProcessor;
         } else {
-            singleDefinitionProcessor.process(definition, bean);
+            return singleDefinitionProcessor;
         }
     }
 
