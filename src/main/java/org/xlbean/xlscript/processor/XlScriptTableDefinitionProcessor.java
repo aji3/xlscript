@@ -6,9 +6,8 @@ import java.util.Map;
 
 import org.jparsec.internal.util.Objects;
 import org.xlbean.XlBean;
-import org.xlbean.data.value.table.TableValueLoader;
+import org.xlbean.data.value.table.TableValueLoader.ToBeanOptionProcessor;
 import org.xlbean.definition.Definition;
-import org.xlbean.definition.SingleDefinition;
 import org.xlbean.definition.TableDefinition;
 import org.xlbean.util.Accessors;
 
@@ -39,12 +38,12 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
         if (dataListForTable == null) {
             return;
         }
-        dataListForTable.forEach(elem -> evaluate(tableDefinition, excel, elem));
-
-        processToBean(tableDefinition, excel, dataListForTable);
+        ToBeanOptionProcessor optionProcessor = new ToBeanOptionProcessor(tableDefinition, excel);
+        dataListForTable.forEach(elem -> evaluate(tableDefinition, excel, elem, optionProcessor));
     }
 
-    private void evaluate(TableDefinition tableDefinition, XlBean bean, Map<String, Object> element) {
+    private void evaluate(TableDefinition tableDefinition, XlBean bean, Map<String, Object> element,
+            ToBeanOptionProcessor optionProcessor) {
         tableDefinition
             .getAttributes()
             .values()
@@ -61,26 +60,7 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
                     Accessors.setValue(columnDefinition.getName(), evaluatedValue, element);
                 }
             });
-    }
-
-    private void processToBean(TableDefinition tableDefinition, XlBean bean, List<Map<String, Object>> list) {
-        SingleDefinition listToPropKeyOptionDefinition = null;
-        SingleDefinition listToPropValueOptionDefinition = null;
-        for (SingleDefinition attr : tableDefinition.getAttributes().values()) {
-            if (TableValueLoader.OPTION_TOBEAN_KEY.equals(attr.getOptions().get(TableValueLoader.OPTION_TOBEAN))) {
-                listToPropKeyOptionDefinition = attr;
-            } else if (TableValueLoader.OPTION_TOBEAN_VALUE.equals(
-                attr.getOptions().get(TableValueLoader.OPTION_TOBEAN))) {
-                listToPropValueOptionDefinition = attr;
-            }
-        }
-        if (listToPropValueOptionDefinition != null && listToPropValueOptionDefinition != null) {
-            for (Map<String, Object> row : list) {
-                String keyObj = Accessors.getValue(listToPropKeyOptionDefinition.getName(), row);
-                Object valueObj = Accessors.getValue(listToPropValueOptionDefinition.getName(), row);
-                Accessors.setValue(keyObj, valueObj, bean);
-            }
-        }
+        optionProcessor.process(element);
     }
 
 }

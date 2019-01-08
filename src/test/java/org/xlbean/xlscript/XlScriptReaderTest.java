@@ -218,6 +218,21 @@ public class XlScriptReaderTest {
         for (int i = 0; i < results.length; i++) {
             assertThat(results[i], is(expected.get(i)));
         }
+    }
+
+    @Test
+    public void testToBean() {
+        InputStream in = XlScriptReaderTest.class.getResourceAsStream("Test_toBean.xlsx");
+        XlBeanReader reader = new XlScriptReader();
+        XlBean excel = reader.read(in);
+
+        System.out.println(excel);
+
+        assertThat(excel.string("aaa"), is("testaaa"));
+        assertThat(excel.string("bbb"), is("testaaa and bbb"));
+        assertThat(excel.get("ccc"), is("1"));
+        assertThat(excel.get("ddd"), is("2"));
+        assertThat(excel.get("eee"), is(3));
 
     }
 }

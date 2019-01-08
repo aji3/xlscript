@@ -91,7 +91,7 @@ public abstract class AbstractXlScriptProcessor {
         }
         String script = markedScript.substring(1, markedScript.length() - 1);
         log.debug("Execute script: {}", script);
-        Map<String, Object> map = new BindingsBuilder().excel(excel).it(listElement).build();
+        Map<String, Object> map = new XlScriptBindingsBuilder().excel(excel).it(listElement).build();
         Object evaluatedValue = null;
         if (baseInstance != null) {
             evaluatedValue = new XlScript(baseInstance).evaluate(script, map);
@@ -144,20 +144,20 @@ public abstract class AbstractXlScriptProcessor {
         return map;
     }
 
-    public static class BindingsBuilder {
+    public static class XlScriptBindingsBuilder {
         private Map<String, Object> bindingsMap = new HashMap<>();
 
-        public BindingsBuilder excel(Map<String, Object> excel) {
+        public XlScriptBindingsBuilder excel(Map<String, Object> excel) {
             putAndPutAll(CONTEXT_KEY_EXCEL, excel);
             return this;
         }
 
-        public BindingsBuilder it(Map<String, Object> it) {
+        public XlScriptBindingsBuilder it(Map<String, Object> it) {
             putAndPutAll(CONTEXT_KEY_LIST_CURRENT_OBJECT, it);
             return this;
         }
 
-        public BindingsBuilder put(String key, Map<String, Object> map) {
+        public XlScriptBindingsBuilder put(String key, Map<String, Object> map) {
             if (key == null || map == null) {
                 return this;
             }
@@ -165,7 +165,7 @@ public abstract class AbstractXlScriptProcessor {
             return this;
         }
 
-        public BindingsBuilder putAll(Map<String, Object> map) {
+        public XlScriptBindingsBuilder putAll(Map<String, Object> map) {
             if (map == null) {
                 return this;
             }
@@ -173,7 +173,7 @@ public abstract class AbstractXlScriptProcessor {
             return this;
         }
 
-        public BindingsBuilder putAndPutAll(String key, Map<String, Object> map) {
+        public XlScriptBindingsBuilder putAndPutAll(String key, Map<String, Object> map) {
             if (key == null || map == null) {
                 return this;
             }
