@@ -2,24 +2,19 @@ package org.xlbean.xlscript;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Comparator;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.xlbean.XlBean;
 import org.xlbean.data.ExcelDataLoader;
 import org.xlbean.definition.BeanDefinitionLoader;
-import org.xlbean.definition.Definition;
 import org.xlbean.definition.DefinitionLoader;
-import org.xlbean.definition.Definitions;
 import org.xlbean.definition.ExcelCommentDefinitionLoader;
 import org.xlbean.definition.ExcelR1C1DefinitionLoader;
-import org.xlbean.definition.TableDefinition;
 import org.xlbean.reader.XlBeanReader;
 import org.xlbean.reader.XlBeanReaderContext;
 import org.xlbean.util.Accessors;
 import org.xlbean.util.XlBeanFactory;
 import org.xlbean.xlscript.config.NoValidationXlBeanFactory;
-import org.xlbean.xlscript.processor.AbstractXlScriptProcessor;
 import org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor;
 import org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor;
 
@@ -49,7 +44,7 @@ public class XlScriptReader extends XlBeanReader {
 
     static {
         XlBeanFactory.setInstance(new NoValidationXlBeanFactory());
-        Accessors.setInstance(new Accessors(false));
+        Accessors.setInstance(new Accessors(false, false, false));
     }
 
     private XlBeanReader reader;
@@ -76,8 +71,8 @@ public class XlScriptReader extends XlBeanReader {
      */
     @Override
     public XlBean read(File excelFile) {
-        XlBeanReaderContext context = reader.readContext(excelFile);
-        processAll(context);
+        XlScriptReaderContext context = toScriptContext(reader.readContext(excelFile));
+        context.processAll();
         return context.getXlBean();
     }
 
@@ -87,8 +82,8 @@ public class XlScriptReader extends XlBeanReader {
      */
     @Override
     public XlBean read(InputStream in) {
-        XlBeanReaderContext context = reader.readContext(in);
-        processAll(context);
+        XlScriptReaderContext context = toScriptContext(reader.readContext(in));
+        context.processAll();
         return context.getXlBean();
     }
 
@@ -99,8 +94,8 @@ public class XlScriptReader extends XlBeanReader {
      */
     @Override
     public XlBean read(Object definitionSource, Workbook dataSource) {
-        XlBeanReaderContext context = reader.readContext(definitionSource, dataSource);
-        processAll(context);
+        XlScriptReaderContext context = toScriptContext(reader.readContext(definitionSource, dataSource));
+        context.processAll();
         return context.getXlBean();
     }
 
@@ -110,8 +105,8 @@ public class XlScriptReader extends XlBeanReader {
      */
     @Override
     public XlBeanReaderContext readContext(File excelFile) {
-        XlBeanReaderContext context = reader.readContext(excelFile);
-        processAll(context);
+        XlScriptReaderContext context = toScriptContext(reader.readContext(excelFile));
+        context.processAll();
         return context;
     }
 
@@ -121,8 +116,8 @@ public class XlScriptReader extends XlBeanReader {
      */
     @Override
     public XlBeanReaderContext readContext(InputStream in) {
-        XlBeanReaderContext context = reader.readContext(in);
-        processAll(context);
+        XlScriptReaderContext context = toScriptContext(reader.readContext(in));
+        context.processAll();
         return context;
     }
 
@@ -133,26 +128,18 @@ public class XlScriptReader extends XlBeanReader {
      */
     @Override
     public XlBeanReaderContext readContext(Object definitionSource, Workbook dataSource) {
-        XlBeanReaderContext context = reader.readContext(definitionSource, dataSource);
-        processAll(context);
+        XlScriptReaderContext context = toScriptContext(reader.readContext(definitionSource, dataSource));
+        context.processAll();
         return context;
     }
 
-    private void processAll(XlBeanReaderContext context) {
-        XlBean bean = context.getXlBean();
-        Definitions definitions = context.getDefinitions();
-        definitions
-            .stream()
-            .sorted(Comparator.comparing(AbstractXlScriptProcessor::getScriptOrder))
-            .forEach(definition -> getProcessor(definition).process(definition, bean));
-    }
-
-    private AbstractXlScriptProcessor getProcessor(Definition definition) {
-        if (definition instanceof TableDefinition) {
-            return tableDefinitionProcessor;
-        } else {
-            return singleDefinitionProcessor;
-        }
+    private XlScriptReaderContext toScriptContext(XlBeanReaderContext context) {
+        XlScriptReaderContext scriptContext = new XlScriptReaderContext(
+            singleDefinitionProcessor,
+            tableDefinitionProcessor);
+        scriptContext.setDefinitions(context.getDefinitions());
+        scriptContext.setXlBean(context.getXlBean());
+        return scriptContext;
     }
 
     public static class XlScriptReaderBuilder {

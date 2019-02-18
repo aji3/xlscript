@@ -1,15 +1,16 @@
 package org.xlbean.xlscript.processor;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 import org.jparsec.internal.util.Objects;
-import org.xlbean.XlBean;
-import org.xlbean.data.value.table.TableValueLoader.ToBeanOptionProcessor;
+import org.xlbean.data.value.table.TableValueLoader.ToMapOptionProcessor;
 import org.xlbean.definition.Definition;
 import org.xlbean.definition.TableDefinition;
 import org.xlbean.util.Accessors;
+import org.xlbean.util.XlBeanFactory;
 
 /**
  * Evaluate XlBean values loaded by TableDefinition as Groovy Script.
@@ -29,21 +30,46 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
         super(baseInstance);
     }
 
-    public void process(Definition definition, XlBean excel) {
+    @Override
+    @SuppressWarnings("unchecked")
+    public void process(Definition definition, Map<String, Object> excel, Map<String, Object> result) {
         TableDefinition tableDefinition = (TableDefinition) definition;
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> dataListForTable = (List<Map<String, Object>>) Accessors.getValue(
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) Accessors.getValue(
             tableDefinition.getName(),
             excel);
-        if (dataListForTable == null) {
+        List<Map<String, Object>> resultDataList = (List<Map<String, Object>>) Accessors.getValue(
+            tableDefinition.getName(),
+            result);
+        if (dataList == null) {
             return;
         }
-        ToBeanOptionProcessor optionProcessor = new ToBeanOptionProcessor(tableDefinition, excel);
-        dataListForTable.forEach(elem -> evaluate(tableDefinition, excel, elem, optionProcessor));
+        if (resultDataList == null) {
+            resultDataList = new ArrayList<>();
+            Accessors.setValue(tableDefinition.getName(), resultDataList, result);
+        }
+        ToMapOptionProcessor optionProcessor = new ToMapOptionProcessor(tableDefinition, excel);
+        optionProcessor.setTargetBean(result);
+        for (int i = 0; i < dataList.size(); i++) {
+            Map<String, Object> elem = dataList.get(i);
+            Map<String, Object> resultElem = null;
+            if (resultDataList.size() <= i) {
+                if (elem != null) {
+                    resultElem = XlBeanFactory.getInstance().createBean();
+                }
+                resultDataList.add(resultElem);
+            } else {
+                resultElem = resultDataList.get(i);
+            }
+            evaluate(tableDefinition, excel, elem, resultElem, optionProcessor);
+        }
     }
 
-    private void evaluate(TableDefinition tableDefinition, XlBean bean, Map<String, Object> element,
-            ToBeanOptionProcessor optionProcessor) {
+    private void evaluate(
+            TableDefinition tableDefinition,
+            Map<String, Object> bean,
+            Map<String, Object> element,
+            Map<String, Object> result,
+            ToMapOptionProcessor optionProcessor) {
         tableDefinition
             .getAttributes()
             .values()
@@ -55,12 +81,12 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
                 if (value == null || !(value instanceof String)) {
                     return;
                 }
-                Object evaluatedValue = evaluateIfScript((String) value, bean, element);
+                Object evaluatedValue = evaluateIfScript((String) value, bean, element, result);
                 if (!Objects.equals(value, evaluatedValue)) {
-                    Accessors.setValue(columnDefinition.getName(), evaluatedValue, element);
+                    Accessors.setValue(columnDefinition.getName(), evaluatedValue, result);
                 }
             });
-        optionProcessor.process(element);
+        optionProcessor.process(result);
     }
 
 }

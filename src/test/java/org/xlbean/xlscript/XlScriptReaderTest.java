@@ -235,4 +235,29 @@ public class XlScriptReaderTest {
         assertThat(excel.get("eee"), is(3));
 
     }
+
+    @Test
+    public void testSkipScript() {
+        InputStream in = XlScriptReaderTest.class.getResourceAsStream("Test_skipScript.xlsx");
+        XlBeanReader reader = new XlScriptReader();
+        XlScriptReaderContext context = (XlScriptReaderContext) reader.readContext(in);
+
+        System.out.println(context.getXlBean());
+
+        PrintStream originalStdout = System.out;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream newStdout = new PrintStream(baos);
+        System.setOut(newStdout);
+
+        context.process("test2");
+        context.process("test2");
+
+        System.setOut(originalStdout);
+
+        String result = new String(baos.toByteArray());
+        String[] results = result.split("\r\n");
+        Arrays.stream(results).forEach(System.out::println);
+
+    }
 }

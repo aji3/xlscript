@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xlbean.XlBean;
 import org.xlbean.definition.Definition;
 import org.xlbean.xlscript.util.XlScript;
 
@@ -22,7 +21,20 @@ public abstract class AbstractXlScriptProcessor {
     public static final String OPTION_SCRIPTORDER = "scriptOrder";
     public static final int DEFAULT_SCRIPTORDER = 1000;
 
-    abstract public void process(Definition definition, XlBean excel);
+    /**
+     * Get a value from {@code excel} based on {@code definition}, evaluate the
+     * value and set the result to {@code result}.
+     * 
+     * <p>
+     * By default, {@link #evaluateIfScript(String, Map, Map)} is used for
+     * evaluation.
+     * </p>
+     * 
+     * @param definition
+     * @param excel
+     * @param result
+     */
+    abstract public void process(Definition definition, Map<String, Object> excel, Map<String, Object> result);
 
     public static final String CONTEXT_KEY_EXCEL = "$excel";
     public static final String CONTEXT_KEY_LIST_CURRENT_OBJECT = "$it";
@@ -85,13 +97,14 @@ public abstract class AbstractXlScriptProcessor {
      * @param listElement
      * @return
      */
-    protected Object evaluateIfScript(String markedScript, XlBean excel, Map<String, Object> listElement) {
+    protected Object evaluateIfScript(String markedScript, Map<String, Object> excel, Map<String, Object> listElement,
+            Map<String, Object> optional) {
         if (!MATCHER.matcher(markedScript).matches()) {
             return markedScript;
         }
         String script = markedScript.substring(1, markedScript.length() - 1);
         log.debug("Execute script: {}", script);
-        Map<String, Object> map = new XlScriptBindingsBuilder().excel(excel).it(listElement).build();
+        Map<String, Object> map = new XlScriptBindingsBuilder().excel(excel).it(listElement).putAll(optional).build();
         Object evaluatedValue = null;
         if (baseInstance != null) {
             evaluatedValue = new XlScript(baseInstance).evaluate(script, map);
@@ -173,7 +186,7 @@ public abstract class AbstractXlScriptProcessor {
             return this;
         }
 
-        public XlScriptBindingsBuilder putAndPutAll(String key, Map<String, Object> map) {
+        private XlScriptBindingsBuilder putAndPutAll(String key, Map<String, Object> map) {
             if (key == null || map == null) {
                 return this;
             }

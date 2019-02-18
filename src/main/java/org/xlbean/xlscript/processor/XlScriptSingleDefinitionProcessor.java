@@ -1,6 +1,7 @@
 package org.xlbean.xlscript.processor;
 
-import org.xlbean.XlBean;
+import java.util.Map;
+
 import org.xlbean.definition.Definition;
 import org.xlbean.definition.SingleDefinition;
 import org.xlbean.util.Accessors;
@@ -23,14 +24,15 @@ public class XlScriptSingleDefinitionProcessor extends AbstractXlScriptProcessor
         super(baseInstance);
     }
 
-    public void process(Definition definition, XlBean bean) {
+    @Override
+    public void process(Definition definition, Map<String, Object> excel, Map<String, Object> result) {
         SingleDefinition singleDefinition = (SingleDefinition) definition;
-        Object obj = Accessors.getValue(singleDefinition.getName(), bean);
+        Object obj = Accessors.getValue(singleDefinition.getName(), excel);
         if (obj == null) {
             return;
         }
-        Object evaluatedValue = evaluateIfScript(obj.toString(), bean, null);
-        Accessors.setValue(singleDefinition.getName(), evaluatedValue, bean);
+        Object evaluatedValue = evaluateIfScript(obj.toString(), excel, null, result);
+        Accessors.setValue(singleDefinition.getName(), evaluatedValue, result);
     }
 
 }
