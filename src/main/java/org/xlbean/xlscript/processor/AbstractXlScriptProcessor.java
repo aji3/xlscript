@@ -77,6 +77,18 @@ public abstract class AbstractXlScriptProcessor {
         this.baseInstance = baseInstance;
     }
 
+    protected boolean isScript(String markedScript) {
+        return trimIfScript(markedScript) != null;
+    }
+
+    protected String trimIfScript(String markedScript) {
+        if (MATCHER.matcher(markedScript).matches()) {
+            return markedScript.substring(1, markedScript.length() - 1);
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Execute {@code markedScript} as Groovy script if it is surrounded by
      * backslash. (e.g. `some script here`)
@@ -97,12 +109,9 @@ public abstract class AbstractXlScriptProcessor {
      * @param listElement
      * @return
      */
-    protected Object evaluateIfScript(String markedScript, Map<String, Object> excel, Map<String, Object> listElement,
+    protected Object evaluate(String markedScript, Map<String, Object> excel, Map<String, Object> listElement,
             Map<String, Object> optional) {
-        if (!MATCHER.matcher(markedScript).matches()) {
-            return markedScript;
-        }
-        String script = markedScript.substring(1, markedScript.length() - 1);
+        String script = trimIfScript(markedScript);
         log.debug("Execute script: {}", script);
         Map<String, Object> map = new XlScriptBindingsBuilder().excel(excel).it(listElement).putAll(optional).build();
         Object evaluatedValue = null;

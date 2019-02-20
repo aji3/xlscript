@@ -31,8 +31,11 @@ public class XlScriptSingleDefinitionProcessor extends AbstractXlScriptProcessor
         if (obj == null) {
             return;
         }
-        Object evaluatedValue = evaluateIfScript(obj.toString(), excel, null, result);
-        Accessors.setValue(singleDefinition.getName(), evaluatedValue, result);
+        String script = obj.toString();
+        if (isScript(script)) {
+            Object evaluatedValue = evaluate(script, excel, null, result);
+            Accessors.setValue(singleDefinition.getName(), evaluatedValue, result);
+        }
     }
 
 }

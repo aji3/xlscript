@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -258,6 +259,21 @@ public class XlScriptReaderTest {
         String result = new String(baos.toByteArray());
         String[] results = result.split("\r\n");
         Arrays.stream(results).forEach(System.out::println);
+        assertThat(results[0], is("test2-111.0"));
+        assertThat(results[1], is("test2-111.0"));
+        assertThat(results.length, is(2));
+
+        context.getXlBean().put("arg1", 123);
+        context.getXlBean().put("arg2", 456);
+        Map<String, Object> res1 = context.process("list");
+        System.out.println(res1);
+        assertThat(res1.get("ddd").toString(), is("test579"));
+
+        context.getXlBean().put("arg1", 222);
+        context.getXlBean().put("arg2", 999);
+        Map<String, Object> res2 = context.process("list");
+        System.out.println(res2);
+        assertThat(res2.get("ddd").toString(), is("test1221"));
 
     }
 }
