@@ -214,7 +214,7 @@ public class XlScriptReaderTest {
             "column4-15",
             "column3-15");
 
-        String[] results = result.split("\r\n");
+        String[] results = result.split(System.lineSeparator());
         Arrays.stream(results).forEach(System.out::println);
         for (int i = 0; i < results.length; i++) {
             assertThat(results[i], is(expected.get(i)));
@@ -257,7 +257,7 @@ public class XlScriptReaderTest {
         System.setOut(originalStdout);
 
         String result = new String(baos.toByteArray());
-        String[] results = result.split("\r\n");
+        String[] results = result.split(System.lineSeparator());
         Arrays.stream(results).forEach(System.out::println);
         assertThat(results[0], is("test2-111.0"));
         assertThat(results[1], is("test2-111.0"));
