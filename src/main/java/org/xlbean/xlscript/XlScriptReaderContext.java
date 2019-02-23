@@ -22,27 +22,31 @@ public class XlScriptReaderContext extends XlBeanReaderContext {
         this.tableDefinitionProcessor = tableDefinitionProcessor;
     }
 
-    public void processAll() {
+    public void evalAll() {
         SkipScriptOptionProcessor skipScriptOptionProcessor = new SkipScriptOptionProcessor();
         getDefinitions()
             .stream()
             .filter(skipScriptOptionProcessor::notSkip)
             .sorted(Comparator.comparing(AbstractXlScriptProcessor::getScriptOrder))
-            .forEach(def -> process(def, getXlBean()));
+            .forEach(def -> evalInternal(def, null, getXlBean()));
     }
 
-    public Map<String, Object> process(String name) {
+    public Map<String, Object> eval(String name) {
+        return eval(name, null);
+    }
+
+    public Map<String, Object> eval(String name, Map<String, Object> optionalMap) {
         Definition definition = getDefinitions().toMap().get(name);
         Map<String, Object> result = XlBeanFactory.getInstance().createBean();
         if (definition == null) {
             return result;
         }
-        process(definition, result);
+        evalInternal(definition, optionalMap, result);
         return result;
     }
 
-    public void process(Definition definition, Map<String, Object> result) {
-        getProcessor(definition).process(definition, getXlBean(), result);
+    public void evalInternal(Definition definition, Map<String, Object> optionalMap, Map<String, Object> result) {
+        getProcessor(definition).process(definition, getXlBean(), optionalMap, result);
     }
 
     private AbstractXlScriptProcessor getProcessor(Definition definition) {

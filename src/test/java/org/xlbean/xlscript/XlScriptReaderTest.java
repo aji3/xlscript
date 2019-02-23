@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -251,8 +252,8 @@ public class XlScriptReaderTest {
         PrintStream newStdout = new PrintStream(baos);
         System.setOut(newStdout);
 
-        context.process("test2");
-        context.process("test2");
+        context.eval("test2");
+        context.eval("test2");
 
         System.setOut(originalStdout);
 
@@ -265,15 +266,19 @@ public class XlScriptReaderTest {
 
         context.getXlBean().put("arg1", 123);
         context.getXlBean().put("arg2", 456);
-        Map<String, Object> res1 = context.process("list");
+        Map<String, Object> res1 = context.eval("list");
         System.out.println(res1);
         assertThat(res1.get("ddd").toString(), is("test579"));
 
         context.getXlBean().put("arg1", 222);
         context.getXlBean().put("arg2", 999);
-        Map<String, Object> res2 = context.process("list");
+        Map<String, Object> res2 = context.eval("list");
         System.out.println(res2);
         assertThat(res2.get("ddd").toString(), is("test1221"));
+
+        Map<String, Object> optionalMap = new HashMap<>();
+        optionalMap.put("arg2", 333);
+        assertThat(context.eval("list", optionalMap).get("ddd").toString(), is("test555"));
 
     }
 }

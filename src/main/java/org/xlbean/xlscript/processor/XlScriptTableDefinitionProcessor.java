@@ -33,7 +33,10 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
 
     @Override
     @SuppressWarnings("unchecked")
-    public void process(Definition definition, Map<String, Object> excel, Map<String, Object> result) {
+    public void process(Definition definition,
+            Map<String, Object> excel,
+            Map<String, Object> optionalMap,
+            Map<String, Object> result) {
         TableDefinition tableDefinition = (TableDefinition) definition;
         List<Map<String, Object>> dataList = (List<Map<String, Object>>) Accessors.getValue(
             tableDefinition.getName(),
@@ -62,16 +65,17 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
             } else {
                 resultElem = resultDataList.get(i);
             }
-            eval(tableDefinition, excel, elem, result, resultElem, optionProcessor);
+            evalInternal(tableDefinition, excel, elem, result, resultElem, optionalMap, optionProcessor);
         }
     }
 
-    private void eval(
+    private void evalInternal(
             TableDefinition tableDefinition,
             Map<String, Object> originalBean,
             Map<String, Object> originalElement,
             Map<String, Object> resultBean,
             Map<String, Object> resultElement,
+            Map<String, Object> optionalMap,
             ToMapOptionProcessor optionProcessor) {
         tableDefinition
             .getAttributes()
@@ -85,10 +89,13 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
                     return;
                 }
                 if (isScript((String) value)) {
-                    Map<String, Object> optionalMap = new HashMap<>();
-                    optionalMap.putAll(resultBean);
-                    optionalMap.putAll(resultElement);
-                    Object evaluatedValue = evaluate((String) value, originalBean, originalElement, optionalMap);
+                    Map<String, Object> tmpOptionalMap = new HashMap<>();
+                    if (optionalMap != null) {
+                        tmpOptionalMap.putAll(optionalMap);
+                    }
+                    tmpOptionalMap.putAll(resultBean);
+                    tmpOptionalMap.putAll(resultElement);
+                    Object evaluatedValue = evaluate((String) value, originalBean, originalElement, tmpOptionalMap);
                     if (!Objects.equals(value, evaluatedValue)) {
                         Accessors.setValue(columnDefinition.getName(), evaluatedValue, resultElement);
                     }

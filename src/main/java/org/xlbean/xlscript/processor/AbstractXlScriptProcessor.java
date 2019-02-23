@@ -34,7 +34,11 @@ public abstract class AbstractXlScriptProcessor {
      * @param excel
      * @param result
      */
-    abstract public void process(Definition definition, Map<String, Object> excel, Map<String, Object> result);
+    abstract public void process(
+            Definition definition,
+            Map<String, Object> excel,
+            Map<String, Object> optionalMap,
+            Map<String, Object> result);
 
     public static final String CONTEXT_KEY_EXCEL = "$excel";
     public static final String CONTEXT_KEY_LIST_CURRENT_OBJECT = "$it";

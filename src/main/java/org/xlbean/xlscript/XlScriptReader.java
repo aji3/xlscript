@@ -72,7 +72,7 @@ public class XlScriptReader extends XlBeanReader {
     @Override
     public XlBean read(File excelFile) {
         XlScriptReaderContext context = toScriptContext(reader.readContext(excelFile));
-        context.processAll();
+        context.evalAll();
         return context.getXlBean();
     }
 
@@ -83,7 +83,7 @@ public class XlScriptReader extends XlBeanReader {
     @Override
     public XlBean read(InputStream in) {
         XlScriptReaderContext context = toScriptContext(reader.readContext(in));
-        context.processAll();
+        context.evalAll();
         return context.getXlBean();
     }
 
@@ -95,7 +95,7 @@ public class XlScriptReader extends XlBeanReader {
     @Override
     public XlBean read(Object definitionSource, Workbook dataSource) {
         XlScriptReaderContext context = toScriptContext(reader.readContext(definitionSource, dataSource));
-        context.processAll();
+        context.evalAll();
         return context.getXlBean();
     }
 
@@ -106,7 +106,7 @@ public class XlScriptReader extends XlBeanReader {
     @Override
     public XlBeanReaderContext readContext(File excelFile) {
         XlScriptReaderContext context = toScriptContext(reader.readContext(excelFile));
-        context.processAll();
+        context.evalAll();
         return context;
     }
 
@@ -117,7 +117,7 @@ public class XlScriptReader extends XlBeanReader {
     @Override
     public XlBeanReaderContext readContext(InputStream in) {
         XlScriptReaderContext context = toScriptContext(reader.readContext(in));
-        context.processAll();
+        context.evalAll();
         return context;
     }
 
@@ -129,7 +129,7 @@ public class XlScriptReader extends XlBeanReader {
     @Override
     public XlBeanReaderContext readContext(Object definitionSource, Workbook dataSource) {
         XlScriptReaderContext context = toScriptContext(reader.readContext(definitionSource, dataSource));
-        context.processAll();
+        context.evalAll();
         return context;
     }
 
