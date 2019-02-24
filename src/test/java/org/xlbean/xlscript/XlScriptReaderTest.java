@@ -18,7 +18,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.junit.Test;
 import org.xlbean.XlBean;
+import org.xlbean.data.ExcelDataLoader;
+import org.xlbean.definition.ExcelCommentDefinitionLoader;
 import org.xlbean.reader.XlBeanReader;
+import org.xlbean.reader.XlBeanReaderContext;
 import org.xlbean.util.FileUtil;
 import org.xlbean.xlscript.XlScriptReader.XlScriptReaderBuilder;
 
@@ -40,6 +43,15 @@ public class XlScriptReaderTest {
         XlBean excel = reader.read(in);
 
         validateTestFile(excel);
+    }
+
+    @Test
+    public void testReadContextFile() {
+        File in = new File(XlScriptReaderTest.class.getResource("Test.xlsx").getFile());
+        XlScriptReader reader = new XlScriptReader();
+        XlBeanReaderContext context = reader.readContext(in);
+
+        validateTestFile(context.getXlBean());
     }
 
     @Test
@@ -223,6 +235,36 @@ public class XlScriptReaderTest {
     }
 
     @Test
+    public void testScriptOrderError() {
+        // not integer scriptOrder
+        PrintStream originalStdout = System.out;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream newStdout = new PrintStream(baos);
+        System.setOut(newStdout);
+
+        InputStream in = XlScriptReaderTest.class.getResourceAsStream("Test_scriptOrder_error.xlsx");
+        XlBeanReader reader = new XlScriptReader();
+        XlBean excel = reader.read(in);
+
+        System.setOut(originalStdout);
+
+        System.out.println(excel);
+        String result = new String(baos.toByteArray());
+
+        List<String> expected = Arrays.asList(
+            "this script to be executed first",
+            "this is second",
+            "this is third");
+
+        String[] results = result.split(System.lineSeparator());
+        Arrays.stream(results).forEach(System.out::println);
+        for (int i = 0; i < results.length; i++) {
+            assertThat(results[i], is(expected.get(i)));
+        }
+    }
+
+    @Test
     public void testToBean() {
         InputStream in = XlScriptReaderTest.class.getResourceAsStream("Test_toBean.xlsx");
         XlBeanReader reader = new XlScriptReader();
@@ -279,6 +321,37 @@ public class XlScriptReaderTest {
         Map<String, Object> optionalMap = new HashMap<>();
         optionalMap.put("arg2", 333);
         assertThat(context.eval("list", optionalMap).get("ddd").toString(), is("test555"));
+
+    }
+
+    @Test
+    public void testReaderBuilder() {
+        InputStream in = XlScriptReaderTest.class.getResourceAsStream("Test_commentDefinition.xlsx");
+        XlScriptReader reader = new XlScriptReaderBuilder()
+            .definitionLoader(new ExcelCommentDefinitionLoader())
+            .dataLoader(new ExcelDataLoader())
+            .build();
+        XlBean xlbean = reader.read(in);
+        System.out.println(xlbean);
+
+        assertThat(xlbean.get("someValue"), is("some value2"));
+        assertThat(xlbean.get("anotherValue"), is("9992.0"));
+        assertThat(xlbean.beans("table").get(0).string("col1"), is("aaa"));
+        assertThat(xlbean.beans("table").get(0).string("col2"), is("12.0"));
+        assertThat(xlbean.beans("table").get(0).string("col3"), is("aaa12.0"));
+        assertThat(xlbean.beans("table").get(1).string("col1"), is(nullValue()));
+        assertThat(xlbean.beans("table").get(1).string("col2"), is("22.0"));
+        assertThat(xlbean.beans("table").get(1).string("col3"), is("null22.0"));
+        assertThat(xlbean.beans("table").get(2).string("col1"), is("ccc"));
+        assertThat(xlbean.beans("table").get(2).string("col2"), is(nullValue()));
+        assertThat(xlbean.beans("table").get(2).string("col3"), is("cccnull"));
+        assertThat(xlbean.beans("table").get(3).string("col1"), is("ddd"));
+        assertThat(xlbean.beans("table").get(3).string("col2"), is("42.0"));
+        assertThat(xlbean.beans("table").get(3).string("col3"), is(nullValue()));
+        assertThat(xlbean.beans("table").get(4).string("col1"), is(nullValue()));
+        assertThat(xlbean.beans("table").get(4).string("col2"), is(nullValue()));
+        assertThat(xlbean.beans("table").get(4).string("col3"), is("nullnull"));
+        assertThat(xlbean.beans("table").size(), is(5));
 
     }
 }

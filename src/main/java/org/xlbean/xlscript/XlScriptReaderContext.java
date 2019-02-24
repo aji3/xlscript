@@ -3,6 +3,8 @@ package org.xlbean.xlscript;
 import java.util.Comparator;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xlbean.definition.Definition;
 import org.xlbean.definition.TableDefinition;
 import org.xlbean.reader.XlBeanReaderContext;
@@ -12,6 +14,8 @@ import org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor;
 import org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor;
 
 public class XlScriptReaderContext extends XlBeanReaderContext {
+
+    private static Logger log = LoggerFactory.getLogger(XlScriptReaderContext.class);
 
     private XlScriptSingleDefinitionProcessor singleDefinitionProcessor;
     private XlScriptTableDefinitionProcessor tableDefinitionProcessor;
@@ -62,7 +66,11 @@ public class XlScriptReaderContext extends XlBeanReaderContext {
         public boolean notSkip(Definition definition) {
             String skipScript = definition.getOptions().get("skipScript");
             if (skipScript != null) {
-                return !Boolean.parseBoolean(skipScript);
+                boolean isNotSkip = !Boolean.parseBoolean(skipScript);
+                if (!isNotSkip) {
+                    log.info("Skip evaluation. [{}]", definition.getName());
+                }
+                return isNotSkip;
             }
             return true;
         }

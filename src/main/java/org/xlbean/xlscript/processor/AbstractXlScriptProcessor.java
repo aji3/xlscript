@@ -118,6 +118,7 @@ public abstract class AbstractXlScriptProcessor {
         String script = trimIfScript(markedScript);
         log.debug("Execute script: {}", script);
         Map<String, Object> map = new XlScriptBindingsBuilder().excel(excel).it(listElement).putAll(optional).build();
+        log.debug("Script context: {}", map);
         Object evaluatedValue = null;
         if (baseInstance != null) {
             evaluatedValue = new XlScript(baseInstance).evaluate(script, map);
@@ -140,34 +141,21 @@ public abstract class AbstractXlScriptProcessor {
      * @return
      */
     public static int getScriptOrder(Definition definition) {
-        String sortOrder = definition.getOptions().get(OPTION_SCRIPTORDER);
-        if (sortOrder == null) {
+        String scriptOrder = definition.getOptions().get(OPTION_SCRIPTORDER);
+        if (scriptOrder == null) {
             return DEFAULT_SCRIPTORDER;
         } else {
             try {
-                return Integer.parseInt(sortOrder);
+                return Integer.parseInt(scriptOrder);
             } catch (NumberFormatException e) {
+                // ignore exception and return default value
+                log.warn(
+                    "Invalid scriptOrder value. Must be integer value. [{}:{}]",
+                    definition.getName(),
+                    scriptOrder);
                 return DEFAULT_SCRIPTORDER;
             }
         }
-    }
-
-    public static Map<String, Object> createBindingsMap(Map<String, Object> excel) {
-        Map<String, Object> map = new HashMap<>();
-        map.putAll(excel);
-        map.put(CONTEXT_KEY_EXCEL, excel);
-        return map;
-    }
-
-    public static Map<String, Object> createBindingsMap(Map<String, Object> excel, Map<String, Object> it) {
-        Map<String, Object> map = new HashMap<>();
-        map.putAll(excel);
-        map.put(CONTEXT_KEY_EXCEL, excel);
-        if (it != null) {
-            map.putAll(it);
-            map.put(CONTEXT_KEY_LIST_CURRENT_OBJECT, it);
-        }
-        return map;
     }
 
     public static class XlScriptBindingsBuilder {
