@@ -28,12 +28,18 @@ repositories {
 }
 
 dependencies {
-	compile group: 'org.xlbean', name: 'xlbean', version:'0.2.2'
+	compile group: 'org.xlbean', name: 'xlbean', version:'0.3.0'
 	
-	compile group: 'org.codehaus.groovy', name: 'groovy-jsr223', version: '2.5.5'
+	compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.5.5'
     
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:hamcrest-all:1.3'
+    
+    testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.14.0'
+    testCompile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
+    testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: '2.22.0'
+    
+    
     
 }
 

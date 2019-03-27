@@ -188,11 +188,12 @@ extends <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProce
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/xlbean/xlscript/processor/XlScriptSingleDefinitionProcessor.html#process-org.xlbean.definition.Definition-java.util.Map-java.util.Map-">process</a></span>(org.xlbean.definition.Definition&nbsp;definition,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/xlbean/xlscript/processor/XlScriptSingleDefinitionProcessor.html#process-org.xlbean.definition.Definition-java.util.Map-java.util.Map-java.util.Map-">process</a></span>(org.xlbean.definition.Definition&nbsp;definition,
        java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;excel,
+       java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;optionalMap,
        java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;result)</code>
-<div class="block">Get a value from <code>excel</code> based on <code>definition</code>, evaluate the
- value and set the result to <code>result</code>.</div>
+<div class="block">Get value from <code>excel</code> based on <code>definition</code>, evaluate the value
+ and set the result to <code>result</code>.</div>
 </td>
 </tr>
 </table>
@@ -201,7 +202,7 @@ extends <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProce
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;org.xlbean.xlscript.processor.<a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html" title="class in org.xlbean.xlscript.processor">AbstractXlScriptProcessor</a></h3>
-<code><a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#createBindingsMap-java.util.Map-">createBindingsMap</a>, <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#createBindingsMap-java.util.Map-java.util.Map-">createBindingsMap</a>, <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#evaluate-java.lang.String-java.util.Map-java.util.Map-java.util.Map-">evaluate</a>, <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#getScriptOrder-org.xlbean.definition.Definition-">getScriptOrder</a>, <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#isScript-java.lang.String-">isScript</a>, <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#trimIfScript-java.lang.String-">trimIfScript</a></code></li>
+<code><a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#evaluate-java.lang.String-java.util.Map-java.util.Map-java.util.Map-">evaluate</a>, <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#getScriptOrder-org.xlbean.definition.Definition-">getScriptOrder</a>, <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#isScript-java.lang.String-">isScript</a>, <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#trimIfScript-java.lang.String-">trimIfScript</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -259,7 +260,7 @@ extends <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProce
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="process-org.xlbean.definition.Definition-java.util.Map-java.util.Map-">
+<a name="process-org.xlbean.definition.Definition-java.util.Map-java.util.Map-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -267,18 +268,22 @@ extends <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProce
 <h4>process</h4>
 <pre>public&nbsp;void&nbsp;process(org.xlbean.definition.Definition&nbsp;definition,
                     java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;excel,
+                    java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;optionalMap,
                     java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;result)</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#process-org.xlbean.definition.Definition-java.util.Map-java.util.Map-">AbstractXlScriptProcessor</a></code></span></div>
-<div class="block">Get a value from <code>excel</code> based on <code>definition</code>, evaluate the
- value and set the result to <code>result</code>.
+<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#process-org.xlbean.definition.Definition-java.util.Map-java.util.Map-java.util.Map-">AbstractXlScriptProcessor</a></code></span></div>
+<div class="block">Get value from <code>excel</code> based on <code>definition</code>, evaluate the value
+ and set the result to <code>result</code>.
  
  <p>
- By default, <code>#evaluateIfScript(String, Map, Map)</code> is used for
- evaluation.
+ By default, <a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#evaluate-java.lang.String-java.util.Map-java.util.Map-java.util.Map-"><code>AbstractXlScriptProcessor.evaluate(String, Map, Map, Map)</code></a> is used for evaluation.
+ </p>
+ 
+ <p>
+ Key-Values in <code>optionalMap</code> will be added to bindings on evaluation.
  </p></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#process-org.xlbean.definition.Definition-java.util.Map-java.util.Map-">process</a></code>&nbsp;in class&nbsp;<code><a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html" title="class in org.xlbean.xlscript.processor">AbstractXlScriptProcessor</a></code></dd>
+<dd><code><a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html#process-org.xlbean.definition.Definition-java.util.Map-java.util.Map-java.util.Map-">process</a></code>&nbsp;in class&nbsp;<code><a href="../../../../org/xlbean/xlscript/processor/AbstractXlScriptProcessor.html" title="class in org.xlbean.xlscript.processor">AbstractXlScriptProcessor</a></code></dd>
 </dl>
 </li>
 </ul>

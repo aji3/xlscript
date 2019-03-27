@@ -1,6 +1,7 @@
 package org.xlbean.xlscript;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -20,10 +21,24 @@ public class XlScriptReaderContext extends XlBeanReaderContext {
     private XlScriptSingleDefinitionProcessor singleDefinitionProcessor;
     private XlScriptTableDefinitionProcessor tableDefinitionProcessor;
 
+    private Map<String, Object> baseBindings = new HashMap<>();
+
     public XlScriptReaderContext(XlScriptSingleDefinitionProcessor singleDefinitionProcessor,
-            XlScriptTableDefinitionProcessor tableDefinitionProcessor) {
+            XlScriptTableDefinitionProcessor tableDefinitionProcessor, Map<String, Object> baseBindings) {
         this.singleDefinitionProcessor = singleDefinitionProcessor;
         this.tableDefinitionProcessor = tableDefinitionProcessor;
+        this.baseBindings = baseBindings;
+    }
+
+    /**
+     * Set given {@code key} and {@code value} to common context which is used for
+     * bindings for all {@link eval} method calls.
+     * 
+     * @param key
+     * @param value
+     */
+    public void addBaseBinding(String key, Object value) {
+        baseBindings.put(key, value);
     }
 
     public void evalAll() {
@@ -49,7 +64,12 @@ public class XlScriptReaderContext extends XlBeanReaderContext {
         return result;
     }
 
-    public void evalInternal(Definition definition, Map<String, Object> optionalMap, Map<String, Object> result) {
+    private void evalInternal(Definition definition, Map<String, Object> optionalMap, Map<String, Object> result) {
+        if (optionalMap == null) {
+            optionalMap = new HashMap<>();
+            optionalMap.put("$context", this);
+        }
+        optionalMap.putAll(baseBindings);
         getProcessor(definition).process(definition, getXlBean(), optionalMap, result);
     }
 
@@ -64,7 +84,7 @@ public class XlScriptReaderContext extends XlBeanReaderContext {
     public static class SkipScriptOptionProcessor {
 
         public boolean notSkip(Definition definition) {
-            String skipScript = definition.getOptions().get("skipScript");
+            String skipScript = definition.getOptions().getOption("skipScript");
             if (skipScript != null) {
                 boolean isNotSkip = !Boolean.parseBoolean(skipScript);
                 if (!isNotSkip) {

@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPattern": "/api/test",
+    "headers": {
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": "{\"bar\":\"buzz\"}",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

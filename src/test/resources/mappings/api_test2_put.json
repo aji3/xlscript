@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "PUT",
+    "urlPattern": "/api/test2",
+    "headers": {
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": "{\"foo\":\"bar\"}",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

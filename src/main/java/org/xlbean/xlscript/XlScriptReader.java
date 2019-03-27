@@ -2,6 +2,8 @@ package org.xlbean.xlscript;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.xlbean.XlBean;
@@ -13,8 +15,7 @@ import org.xlbean.definition.ExcelR1C1DefinitionLoader;
 import org.xlbean.reader.XlBeanReader;
 import org.xlbean.reader.XlBeanReaderContext;
 import org.xlbean.util.Accessors;
-import org.xlbean.util.XlBeanFactory;
-import org.xlbean.xlscript.config.NoValidationXlBeanFactory;
+import org.xlbean.util.Accessors.AccessorConfig.AccessorConfigBuilder;
 import org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor;
 import org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor;
 
@@ -43,13 +44,15 @@ import org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor;
 public class XlScriptReader extends XlBeanReader {
 
     static {
-        XlBeanFactory.setInstance(new NoValidationXlBeanFactory());
-        Accessors.setInstance(new Accessors(false, false, false));
+        Accessors.setInstance(
+            new Accessors(
+                new AccessorConfigBuilder().ignoreNull(false).ignoreBlankMap(false).ignoreBlankList(false).build()));
     }
 
     private XlBeanReader reader;
     private XlScriptSingleDefinitionProcessor singleDefinitionProcessor = new XlScriptSingleDefinitionProcessor();
     private XlScriptTableDefinitionProcessor tableDefinitionProcessor = new XlScriptTableDefinitionProcessor();
+    private Map<String, Object> baseBindings = new HashMap<>();
 
     /**
      * Constructor which uses {@link XlBeanReader} to read excel file.
@@ -136,7 +139,8 @@ public class XlScriptReader extends XlBeanReader {
     private XlScriptReaderContext toScriptContext(XlBeanReaderContext context) {
         XlScriptReaderContext scriptContext = new XlScriptReaderContext(
             singleDefinitionProcessor,
-            tableDefinitionProcessor);
+            tableDefinitionProcessor,
+            baseBindings);
         scriptContext.setDefinitions(context.getDefinitions());
         scriptContext.setXlBean(context.getXlBean());
         return scriptContext;
@@ -147,6 +151,7 @@ public class XlScriptReader extends XlBeanReader {
         private XlBeanReaderBuilder builder = new XlBeanReaderBuilder();
         private String baseScript;
         private Object baseInstance;
+        private Map<String, Object> baseBindings = new HashMap<>();
 
         public XlScriptReaderBuilder baseScript(String baseScript) {
             this.baseScript = baseScript;
@@ -186,6 +191,24 @@ public class XlScriptReader extends XlBeanReader {
             return this;
         }
 
+        /**
+         * Set given {@code key} and {@code value} to common context which is used for
+         * bindings for all {@link eval} method calls.
+         * 
+         * @param key
+         * @param value
+         */
+        public XlScriptReaderBuilder addBaseBinding(String key, Object value) {
+            baseBindings.put(key, value);
+            return this;
+        }
+
+        /**
+         * If both {@code baseInstance} and {@code baseSript} is set,
+         * {@code baseInstance} will be applied.
+         * 
+         * @return
+         */
         public XlScriptReader build() {
             XlScriptReader reader = new XlScriptReader(builder.build());
             if (this.baseInstance != null) {
@@ -195,6 +218,7 @@ public class XlScriptReader extends XlBeanReader {
                 reader.singleDefinitionProcessor = new XlScriptSingleDefinitionProcessor(this.baseScript);
                 reader.tableDefinitionProcessor = new XlScriptTableDefinitionProcessor(this.baseScript);
             }
+            reader.baseBindings = baseBindings;
             return reader;
         }
     }

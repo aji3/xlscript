@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jparsec.internal.util.Objects;
 import org.xlbean.data.value.table.TableValueLoader.ToMapOptionProcessor;
 import org.xlbean.definition.Definition;
 import org.xlbean.definition.TableDefinition;
@@ -41,12 +40,12 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
         List<Map<String, Object>> dataList = (List<Map<String, Object>>) Accessors.getValue(
             tableDefinition.getName(),
             excel);
-        List<Map<String, Object>> resultDataList = (List<Map<String, Object>>) Accessors.getValue(
-            tableDefinition.getName(),
-            result);
         if (dataList == null) {
             return;
         }
+        List<Map<String, Object>> resultDataList = (List<Map<String, Object>>) Accessors.getValue(
+            tableDefinition.getName(),
+            result);
         if (resultDataList == null) {
             resultDataList = new ArrayList<>();
             Accessors.setValue(tableDefinition.getName(), resultDataList, result, true, true, false);
@@ -96,7 +95,7 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
                     tmpOptionalMap.putAll(resultBean);
                     tmpOptionalMap.putAll(resultElement);
                     Object evaluatedValue = evaluate((String) value, originalBean, originalElement, tmpOptionalMap);
-                    if (!Objects.equals(value, evaluatedValue)) {
+                    if (!value.equals(evaluatedValue)) {
                         Accessors.setValue(columnDefinition.getName(), evaluatedValue, resultElement);
                     }
                 }

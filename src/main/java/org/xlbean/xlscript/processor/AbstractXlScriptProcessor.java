@@ -22,16 +22,20 @@ public abstract class AbstractXlScriptProcessor {
     public static final int DEFAULT_SCRIPTORDER = 1000;
 
     /**
-     * Get a value from {@code excel} based on {@code definition}, evaluate the
-     * value and set the result to {@code result}.
+     * Get value from {@code excel} based on {@code definition}, evaluate the value
+     * and set the result to {@code result}.
      * 
      * <p>
-     * By default, {@link #evaluateIfScript(String, Map, Map)} is used for
-     * evaluation.
+     * By default, {@link #evaluate(String, Map, Map, Map)} is used for evaluation.
+     * </p>
+     * 
+     * <p>
+     * Key-Values in {@code optionalMap} will be added to bindings on evaluation.
      * </p>
      * 
      * @param definition
      * @param excel
+     * @param optionalMap
      * @param result
      */
     abstract public void process(
@@ -105,6 +109,7 @@ public abstract class AbstractXlScriptProcessor {
      * accessible from script by either "testList" or "$excel.testList"</li>
      * <li>$it: {@code listElement} object</li>
      * <li>keys in {@code listElement}</li>
+     * <li>keys in {@code optional}</li>
      * </ul>
      * </p>
      * 
@@ -141,7 +146,7 @@ public abstract class AbstractXlScriptProcessor {
      * @return
      */
     public static int getScriptOrder(Definition definition) {
-        String scriptOrder = definition.getOptions().get(OPTION_SCRIPTORDER);
+        String scriptOrder = definition.getOptions().getOption(OPTION_SCRIPTORDER);
         if (scriptOrder == null) {
             return DEFAULT_SCRIPTORDER;
         } else {

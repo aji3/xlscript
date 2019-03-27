@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -151,8 +151,9 @@ extends org.xlbean.reader.XlBeanReaderContext</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#XlScriptReaderContext-org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor-org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor-">XlScriptReaderContext</a></span>(<a href="../../../org/xlbean/xlscript/processor/XlScriptSingleDefinitionProcessor.html" title="class in org.xlbean.xlscript.processor">XlScriptSingleDefinitionProcessor</a>&nbsp;singleDefinitionProcessor,
-                     <a href="../../../org/xlbean/xlscript/processor/XlScriptTableDefinitionProcessor.html" title="class in org.xlbean.xlscript.processor">XlScriptTableDefinitionProcessor</a>&nbsp;tableDefinitionProcessor)</code>&nbsp;</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#XlScriptReaderContext-org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor-org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor-java.util.Map-">XlScriptReaderContext</a></span>(<a href="../../../org/xlbean/xlscript/processor/XlScriptSingleDefinitionProcessor.html" title="class in org.xlbean.xlscript.processor">XlScriptSingleDefinitionProcessor</a>&nbsp;singleDefinitionProcessor,
+                     <a href="../../../org/xlbean/xlscript/processor/XlScriptTableDefinitionProcessor.html" title="class in org.xlbean.xlscript.processor">XlScriptTableDefinitionProcessor</a>&nbsp;tableDefinitionProcessor,
+                     java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;baseBindings)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -171,16 +172,24 @@ extends org.xlbean.reader.XlBeanReaderContext</pre>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#process-org.xlbean.definition.Definition-java.util.Map-">process</a></span>(org.xlbean.definition.Definition&nbsp;definition,
-       java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;result)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#addBaseBinding-java.lang.String-java.lang.Object-">addBaseBinding</a></span>(java.lang.String&nbsp;key,
+              java.lang.Object&nbsp;value)</code>
+<div class="block">Set given <code>key</code> and <code>value</code> to common context which is used for
+ bindings for all <code>eval</code> method calls.</div>
+</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>java.util.Map&lt;java.lang.String,java.lang.Object&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#process-java.lang.String-">process</a></span>(java.lang.String&nbsp;name)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#eval-java.lang.String-">eval</a></span>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code>java.util.Map&lt;java.lang.String,java.lang.Object&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#eval-java.lang.String-java.util.Map-">eval</a></span>(java.lang.String&nbsp;name,
+    java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;optionalMap)</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#processAll--">processAll</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#evalAll--">evalAll</a></span>()</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -211,14 +220,15 @@ extends org.xlbean.reader.XlBeanReaderContext</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="XlScriptReaderContext-org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor-org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor-">
+<a name="XlScriptReaderContext-org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor-org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>XlScriptReaderContext</h4>
 <pre>public&nbsp;XlScriptReaderContext(<a href="../../../org/xlbean/xlscript/processor/XlScriptSingleDefinitionProcessor.html" title="class in org.xlbean.xlscript.processor">XlScriptSingleDefinitionProcessor</a>&nbsp;singleDefinitionProcessor,
-                             <a href="../../../org/xlbean/xlscript/processor/XlScriptTableDefinitionProcessor.html" title="class in org.xlbean.xlscript.processor">XlScriptTableDefinitionProcessor</a>&nbsp;tableDefinitionProcessor)</pre>
+                             <a href="../../../org/xlbean/xlscript/processor/XlScriptTableDefinitionProcessor.html" title="class in org.xlbean.xlscript.processor">XlScriptTableDefinitionProcessor</a>&nbsp;tableDefinitionProcessor,
+                             java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;baseBindings)</pre>
 </li>
 </ul>
 </li>
@@ -229,32 +239,49 @@ extends org.xlbean.reader.XlBeanReaderContext</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="processAll--">
+<a name="addBaseBinding-java.lang.String-java.lang.Object-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>processAll</h4>
-<pre>public&nbsp;void&nbsp;processAll()</pre>
+<h4>addBaseBinding</h4>
+<pre>public&nbsp;void&nbsp;addBaseBinding(java.lang.String&nbsp;key,
+                           java.lang.Object&nbsp;value)</pre>
+<div class="block">Set given <code>key</code> and <code>value</code> to common context which is used for
+ bindings for all <code>eval</code> method calls.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>key</code> - </dd>
+<dd><code>value</code> - </dd>
+</dl>
 </li>
 </ul>
-<a name="process-java.lang.String-">
+<a name="evalAll--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>process</h4>
-<pre>public&nbsp;java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;process(java.lang.String&nbsp;name)</pre>
+<h4>evalAll</h4>
+<pre>public&nbsp;void&nbsp;evalAll()</pre>
 </li>
 </ul>
-<a name="process-org.xlbean.definition.Definition-java.util.Map-">
+<a name="eval-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>eval</h4>
+<pre>public&nbsp;java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;eval(java.lang.String&nbsp;name)</pre>
+</li>
+</ul>
+<a name="eval-java.lang.String-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>process</h4>
-<pre>public&nbsp;void&nbsp;process(org.xlbean.definition.Definition&nbsp;definition,
-                    java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;result)</pre>
+<h4>eval</h4>
+<pre>public&nbsp;java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;eval(java.lang.String&nbsp;name,
+                                                             java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;optionalMap)</pre>
 </li>
 </ul>
 </li>
