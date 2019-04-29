@@ -59,20 +59,5 @@ Only difference is that values put in back quote will be evaluated as Groovy scr
 As shown in the image above, 
 
 ## 3. Java Program
-```java
-InputStream in = new FileInputStream("example/presidents.xlsx");
-XlBeanReader reader = new XlBeanReader();
-XlBean bean = reader.read(in);
-
-List<XlBean> list = bean.beans("presidents");
-// List filled with Map of String
-System.out.println(list.get(0).get("name")); // John F. Kennedy
-System.out.println(list.get(0).get("dateOfBirth")); // 1917-05-29T00:00:00.000
-
-// The map can be mapped to Class
-List<President> presidents = bean.listOf("presidents", President.class);
-```
-
-
 
 
