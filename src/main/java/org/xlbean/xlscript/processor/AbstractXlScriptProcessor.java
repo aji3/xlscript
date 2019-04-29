@@ -139,7 +139,7 @@ public abstract class AbstractXlScriptProcessor implements XlScriptProcessor {
         }
 
         public XlScriptBindingsBuilder put(String key, Map<String, Object> map) {
-            if (key == null || map == null) {
+            if (key == null) {
                 return this;
             }
             bindingsMap.put(key, map);

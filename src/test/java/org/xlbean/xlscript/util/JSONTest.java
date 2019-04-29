@@ -32,7 +32,7 @@ public class JSONTest {
         objChild.put("child", objGrandChild);
         objGrandChild.put("localdate", LocalDate.of(2019, 4, 29));
         objGrandChild.put("localdatetime", LocalDateTime.of(2019, 4, 29, 12, 34, 56, 789));
-        List<Map<String, Object>> list = new ArrayList<Map<String,Object>>();
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         obj.put("list", list);
         Map<String, Object> objElem = new LinkedHashMap<>();
         objElem.put("ddd", "ddd-1");
@@ -42,13 +42,14 @@ public class JSONTest {
         objElem.put("ddd", "ddd-2");
         objElem.put("eee", "eee-2");
         list.add(objElem);
-        
+
         String json = JSON.stringify(obj);
         System.out.println(json);
+        assertThat(json, is ("{\"aaa\":\"value\",\"bbb\":1,\"child\":{\"aaa\":\"value\",\"bbb\":1,\"_self\":\"DROPPED DUE TO RECURSIVE OBJECT\",\"testClass\":\"DROPPED DUE TO INCONVERTABLE OBJECT: class org.xlbean.xlscript.util.JSONTest$TestClass\",\"child\":{\"localdate\":\"2019-04-29T00:00:00.000\",\"localdatetime\":\"2019-04-29T12:34:56.000\"}},\"list\":[{\"ddd\":\"ddd-1\",\"eee\":\"eee-1\"},{\"ddd\":\"ddd-2\",\"eee\":\"eee-2\"}]}"));
     }
-    
+
     public static class TestClass {
-        
+
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -71,7 +72,7 @@ public class JSONTest {
         assertThat(list.get(0).get("key"), is("nested.val1"));
         assertThat(list.get(1).get("key"), is("nested.val2"));
         assertThat(list.get(2).get("key"), is("nested.val3"));
-        Map<String, Object> nested = (Map<String, Object>)obj.get("nested");
+        Map<String, Object> nested = (Map<String, Object>) obj.get("nested");
         assertThat(nested.get("val1"), is("111"));
         assertThat(nested.get("val2"), is("222"));
         assertThat(nested.get("val3"), is(333));
@@ -91,6 +92,20 @@ public class JSONTest {
         assertThat(table.get(2).get("col3"), is("cccnull"));
         assertThat(table.get(3).get("col3"), is(nullValue()));
         assertThat(table.get(4).get("col3"), is("nullnull"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void parseList() {
+        List<String> list = (List<String>) JSON.parse("[\"aaa\", \"bbb\"]");
+        assertThat(list.size(), is(2));
+        assertThat(list.get(0), is("aaa"));
+        assertThat(list.get(1), is("bbb"));
+    }
+
+    @Test
+    public void parseError() {
+        assertThat(JSON.parse("abc"), is("Illegal JSON string: abc"));
     }
 
 }
