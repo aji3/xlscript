@@ -389,7 +389,7 @@ public class XlScriptReaderTest {
         System.setOut(ps);
 
         String stdoutStr = new String(baos.toByteArray());
-        String[] stdout = stdoutStr.split("\r\n");
+        String[] stdout = stdoutStr.split(System.lineSeparator());
         List<String> list = Arrays.stream(stdout).map(str -> str.replaceAll("^[^-]*-\\s*", "")).collect(Collectors.toList());
         list.forEach(System.out::println);
         assertThat(list.contains("----Error occured during evaluating script"), is (true));
