@@ -38,9 +38,9 @@ dependencies {
 
 ## 2. Define Mapping Definition on Excel sheet
 
-Since this library uses xlbean internally to load values from Excel sheet, the way for data definition is the same as xlbean as explained [here](https://github.com/aji3/xlbean/wiki).
+Since this library uses xlbean internally to load values from Excel sheet, the way to define data loading is the same as xlbean as explained [here](https://github.com/aji3/xlbean/wiki).
 
-Only difference is that a value in this format ``` `any_script` ``` will be evaluated as Groovy script.
+Only difference is that values put in back quote will be evaluated as Groovy script. ``` `this is evaluated as groovy script` ```
 
 1. Define name for each column of table in Excel sheet.
 
@@ -56,7 +56,7 @@ Only difference is that a value in this format ``` `any_script` ``` will be eval
 
     ![Example of excel sheet](https://user-images.githubusercontent.com/23234132/29244923-4f5cba56-8002-11e7-929d-617a9ea38d83.png "Excelシートの例")
 
-As shown in the 
+As shown in the image above, 
 
 ## 3. Java Program
 ```java

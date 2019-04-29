@@ -6,6 +6,7 @@ import org.apache.commons.collections4.map.HashedMap;
 import org.xlbean.definition.Definition;
 import org.xlbean.definition.SingleDefinition;
 import org.xlbean.util.Accessors;
+import org.xlbean.xlscript.script.XlScriptFactory;
 
 /**
  * Implementation of AbstractXlScriptProcessor for SingleDefinition.
@@ -15,16 +16,17 @@ import org.xlbean.util.Accessors;
  */
 public class XlScriptSingleDefinitionProcessor extends AbstractXlScriptProcessor {
 
-    public XlScriptSingleDefinitionProcessor() {}
-
-    public XlScriptSingleDefinitionProcessor(String baseScript) {
-        super(baseScript);
+    public XlScriptSingleDefinitionProcessor(XlScriptFactory scriptProvider) {
+        super(scriptProvider);
     }
 
-    public XlScriptSingleDefinitionProcessor(Object baseInstance) {
-        super(baseInstance);
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.xlbean.xlscript.processor.XlScriptProcessor#process(org.xlbean.definition
+     * .Definition, java.util.Map, java.util.Map, java.util.Map)
+     */
     @Override
     public void process(Definition definition,
             Map<String, Object> excel,
@@ -42,7 +44,7 @@ public class XlScriptSingleDefinitionProcessor extends AbstractXlScriptProcessor
                 optional.putAll(optionalMap);
             }
             optional.putAll(result);
-            Object evaluatedValue = evaluate(script, excel, null, optional);
+            Object evaluatedValue = evaluate(script, excel, optional);
             Accessors.setValue(singleDefinition.getName(), evaluatedValue, result);
         }
     }

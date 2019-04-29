@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -23,7 +24,7 @@ import org.xlbean.definition.ExcelCommentDefinitionLoader;
 import org.xlbean.reader.XlBeanReader;
 import org.xlbean.reader.XlBeanReaderContext;
 import org.xlbean.util.FileUtil;
-import org.xlbean.xlscript.XlScriptReader.XlScriptReaderBuilder;
+import org.xlbean.xlscript.XlScriptReader.Builder;
 
 public class XlScriptReaderTest {
 
@@ -100,7 +101,7 @@ public class XlScriptReaderTest {
     @Test
     public void testBaseScript() {
         InputStream in = XlScriptReaderTest.class.getResourceAsStream("Test_forBaseScript.xlsx");
-        XlScriptReader reader = new XlScriptReaderBuilder()
+        XlScriptReader reader = new Builder()
             .baseInstance(new SampleBaseInstance())
             .build();
         XlBean excel = reader.read(in);
@@ -111,7 +112,7 @@ public class XlScriptReaderTest {
     @Test
     public void testBaseInstance() {
         InputStream in = XlScriptReaderTest.class.getResourceAsStream("Test_forBaseScript.xlsx");
-        XlScriptReader reader = new XlScriptReaderBuilder()
+        XlScriptReader reader = new Builder()
             .baseScript(
                 "def concat(String s1, String s2) {\"${s1}${s2}\"}\r\n"
                         + "def add(int i1, int i2) {i1 + i2}")
@@ -229,8 +230,10 @@ public class XlScriptReaderTest {
 
         String[] results = result.split(System.lineSeparator());
         Arrays.stream(results).forEach(System.out::println);
-        for (int i = 0; i < results.length; i++) {
-            assertThat(results[i], is(expected.get(i)));
+        List<String> resultsList = Arrays.stream(results).filter(elem -> !elem.contains("org.xl")).collect(
+            Collectors.toList());
+        for (int i = 0; i < resultsList.size(); i++) {
+            assertThat(resultsList.get(i), is(expected.get(i)));
         }
     }
 
@@ -258,9 +261,10 @@ public class XlScriptReaderTest {
             "this is third");
 
         String[] results = result.split(System.lineSeparator());
-        Arrays.stream(results).forEach(System.out::println);
-        for (int i = 0; i < results.length; i++) {
-            assertThat(results[i], is(expected.get(i)));
+        List<String> resultsList = Arrays.stream(results).filter(elem -> elem.startsWith("this")).collect(
+            Collectors.toList());
+        for (int i = 0; i < resultsList.size(); i++) {
+            assertThat(resultsList.get(i), is(expected.get(i)));
         }
     }
 
@@ -301,10 +305,11 @@ public class XlScriptReaderTest {
 
         String result = new String(baos.toByteArray());
         String[] results = result.split(System.lineSeparator());
-        Arrays.stream(results).forEach(System.out::println);
-        assertThat(results[0], is("test2-111.0"));
-        assertThat(results[1], is("test2-111.0"));
-        assertThat(results.length, is(2));
+        List<String> resultsList = Arrays.stream(results).filter(elem -> !elem.contains("org.xl")).collect(
+            Collectors.toList());
+        assertThat(resultsList.get(0), is("test2-111.0"));
+        assertThat(resultsList.get(1), is("test2-111.0"));
+        assertThat(resultsList.size(), is(2));
 
         context.getXlBean().put("arg1", 123);
         context.getXlBean().put("arg2", 456);
@@ -327,7 +332,7 @@ public class XlScriptReaderTest {
     @Test
     public void testReaderBuilder() {
         InputStream in = XlScriptReaderTest.class.getResourceAsStream("Test_commentDefinition.xlsx");
-        XlScriptReader reader = new XlScriptReaderBuilder()
+        XlScriptReader reader = new Builder()
             .definitionLoader(new ExcelCommentDefinitionLoader())
             .dataLoader(new ExcelDataLoader())
             .build();

@@ -7,27 +7,22 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xlbean.definition.Definition;
-import org.xlbean.definition.TableDefinition;
 import org.xlbean.reader.XlBeanReaderContext;
 import org.xlbean.util.XlBeanFactory;
-import org.xlbean.xlscript.processor.AbstractXlScriptProcessor;
-import org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor;
-import org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor;
+import org.xlbean.xlscript.processor.AbstractXlScriptProcessor.ScriptOrderOptionProcessor;
+import org.xlbean.xlscript.processor.XlScriptProcessorProvider;
 
 public class XlScriptReaderContext extends XlBeanReaderContext {
 
     private static Logger log = LoggerFactory.getLogger(XlScriptReaderContext.class);
 
-    private XlScriptSingleDefinitionProcessor singleDefinitionProcessor;
-    private XlScriptTableDefinitionProcessor tableDefinitionProcessor;
+    private XlScriptProcessorProvider scriptProcessorProvider = new XlScriptProcessorProvider();
 
-    private Map<String, Object> baseBindings = new HashMap<>();
+    private SkipScriptOptionProcessor skipScriptOptionProcessor = new SkipScriptOptionProcessor();
+    private ScriptOrderOptionProcessor scriptOrderOptionProcessor = new ScriptOrderOptionProcessor();
 
-    public XlScriptReaderContext(XlScriptSingleDefinitionProcessor singleDefinitionProcessor,
-            XlScriptTableDefinitionProcessor tableDefinitionProcessor, Map<String, Object> baseBindings) {
-        this.singleDefinitionProcessor = singleDefinitionProcessor;
-        this.tableDefinitionProcessor = tableDefinitionProcessor;
-        this.baseBindings = baseBindings;
+    public XlScriptReaderContext(XlScriptProcessorProvider scriptProcessorProvider) {
+        this.scriptProcessorProvider = scriptProcessorProvider;
     }
 
     /**
@@ -38,15 +33,23 @@ public class XlScriptReaderContext extends XlBeanReaderContext {
      * @param value
      */
     public void addBaseBinding(String key, Object value) {
-        baseBindings.put(key, value);
+        scriptProcessorProvider.addBaseBinding(key, value);
     }
 
+    /**
+     * Evaluate all values in XlBean defined by the Definitions.
+     * 
+     * <p>
+     * Iterate over all Definitions, first evaluate skipScript option and skip the
+     * Definition if true, sort definitions by scriptOrder option then evaluate as
+     * Groovy script.
+     * </p>
+     */
     public void evalAll() {
-        SkipScriptOptionProcessor skipScriptOptionProcessor = new SkipScriptOptionProcessor();
         getDefinitions()
             .stream()
             .filter(skipScriptOptionProcessor::notSkip)
-            .sorted(Comparator.comparing(AbstractXlScriptProcessor::getScriptOrder))
+            .sorted(Comparator.comparing(scriptOrderOptionProcessor::getScriptOrder))
             .forEach(def -> evalInternal(def, null, getXlBean()));
     }
 
@@ -54,6 +57,18 @@ public class XlScriptReaderContext extends XlBeanReaderContext {
         return eval(name, null);
     }
 
+    /**
+     * Evaluate values in XlBean defined by a Definition with {@code name}.
+     * 
+     * <p>
+     * {@code optionalMap} will be registered to Bindings when evaluating Groovy
+     * script.
+     * </p>
+     * 
+     * @param name
+     * @param optionalMap
+     * @return
+     */
     public Map<String, Object> eval(String name, Map<String, Object> optionalMap) {
         Definition definition = getDefinitions().toMap().get(name);
         Map<String, Object> result = XlBeanFactory.getInstance().createBean();
@@ -69,18 +84,15 @@ public class XlScriptReaderContext extends XlBeanReaderContext {
             optionalMap = new HashMap<>();
             optionalMap.put("$context", this);
         }
-        optionalMap.putAll(baseBindings);
-        getProcessor(definition).process(definition, getXlBean(), optionalMap, result);
+        scriptProcessorProvider.getProcessor(definition).process(definition, getXlBean(), optionalMap, result);
     }
 
-    private AbstractXlScriptProcessor getProcessor(Definition definition) {
-        if (definition instanceof TableDefinition) {
-            return tableDefinitionProcessor;
-        } else {
-            return singleDefinitionProcessor;
-        }
-    }
-
+    /**
+     * Process skipScript option.
+     * 
+     * @author tanikawa
+     *
+     */
     public static class SkipScriptOptionProcessor {
 
         public boolean notSkip(Definition definition) {

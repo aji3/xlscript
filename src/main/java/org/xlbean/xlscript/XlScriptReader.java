@@ -2,8 +2,6 @@ package org.xlbean.xlscript;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.xlbean.XlBean;
@@ -14,28 +12,22 @@ import org.xlbean.definition.ExcelCommentDefinitionLoader;
 import org.xlbean.definition.ExcelR1C1DefinitionLoader;
 import org.xlbean.reader.XlBeanReader;
 import org.xlbean.reader.XlBeanReaderContext;
-import org.xlbean.util.Accessors;
-import org.xlbean.util.Accessors.AccessorConfig.AccessorConfigBuilder;
-import org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor;
-import org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor;
+import org.xlbean.xlscript.processor.XlScriptProcessorProvider;
 
 /**
  * Extends {@link XlBeanReader} to add function to evaluate XlBean values as
  * Groovy script on read.
  * 
  * <p>
- * It loads all the values from excel file first then evaluate script. It means
+ * This class loads all the values from excel file first then evaluate. It means
  * that all values in excel are accessible when evaluating script.
  * </p>
  * 
  * <p>
- * This class has static initializer for the following initialization:
- * <ol>
- * <li>Set NoValidationXlBeanFactory: to set any type of evaluated value to
- * XlBean</li>
- * <li>Set Accessors#noNullValue flag to false: to allow null value for XlBean
- * because keys are required for Groovy script to be compiled properly.</li>
- * </ol>
+ * By default, order of evaluation is based on the location of Definition. From
+ * left to right and top to bottom. You can change order by scriptOrder option.
+ * The default scriptOrder is 1000 so any value above this will be executed
+ * after and below before.
  * </p>
  * 
  * @author tanikawa
@@ -43,16 +35,8 @@ import org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor;
  */
 public class XlScriptReader extends XlBeanReader {
 
-    static {
-        Accessors.setInstance(
-            new Accessors(
-                new AccessorConfigBuilder().ignoreNull(false).ignoreBlankMap(false).ignoreBlankList(false).build()));
-    }
-
     private XlBeanReader reader;
-    private XlScriptSingleDefinitionProcessor singleDefinitionProcessor = new XlScriptSingleDefinitionProcessor();
-    private XlScriptTableDefinitionProcessor tableDefinitionProcessor = new XlScriptTableDefinitionProcessor();
-    private Map<String, Object> baseBindings = new HashMap<>();
+    private XlScriptProcessorProvider scriptProcessorProvider = new XlScriptProcessorProvider();
 
     /**
      * Constructor which uses {@link XlBeanReader} to read excel file.
@@ -137,29 +121,24 @@ public class XlScriptReader extends XlBeanReader {
     }
 
     private XlScriptReaderContext toScriptContext(XlBeanReaderContext context) {
-        XlScriptReaderContext scriptContext = new XlScriptReaderContext(
-            singleDefinitionProcessor,
-            tableDefinitionProcessor,
-            baseBindings);
+        XlScriptReaderContext scriptContext = new XlScriptReaderContext(scriptProcessorProvider);
         scriptContext.setDefinitions(context.getDefinitions());
         scriptContext.setXlBean(context.getXlBean());
         return scriptContext;
     }
 
-    public static class XlScriptReaderBuilder {
+    public static class Builder {
 
         private XlBeanReaderBuilder builder = new XlBeanReaderBuilder();
-        private String baseScript;
-        private Object baseInstance;
-        private Map<String, Object> baseBindings = new HashMap<>();
+        private XlScriptProcessorProvider scriptProcessorProvider = new XlScriptProcessorProvider();
 
-        public XlScriptReaderBuilder baseScript(String baseScript) {
-            this.baseScript = baseScript;
+        public Builder baseScript(String baseScript) {
+            this.scriptProcessorProvider.setBaseScript(baseScript);
             return this;
         }
 
-        public XlScriptReaderBuilder baseInstance(Object baseInstance) {
-            this.baseInstance = baseInstance;
+        public Builder baseInstance(Object baseInstance) {
+            this.scriptProcessorProvider.setBaseInstance(baseInstance);
             return this;
         }
 
@@ -173,7 +152,7 @@ public class XlScriptReader extends XlBeanReader {
          * @param definitionLoader
          * @return
          */
-        public XlScriptReaderBuilder definitionLoader(DefinitionLoader definitionLoader) {
+        public Builder definitionLoader(DefinitionLoader definitionLoader) {
             builder.definitionLoader(definitionLoader);
             return this;
         }
@@ -186,7 +165,7 @@ public class XlScriptReader extends XlBeanReader {
          * @param dataLoader
          * @return
          */
-        public XlScriptReaderBuilder dataLoader(ExcelDataLoader dataLoader) {
+        public Builder dataLoader(ExcelDataLoader dataLoader) {
             builder.dataLoader(dataLoader);
             return this;
         }
@@ -198,8 +177,13 @@ public class XlScriptReader extends XlBeanReader {
          * @param key
          * @param value
          */
-        public XlScriptReaderBuilder addBaseBinding(String key, Object value) {
-            baseBindings.put(key, value);
+        public Builder addBaseBinding(String key, Object value) {
+            scriptProcessorProvider.addBaseBinding(key, value);
+            return this;
+        }
+
+        public Builder scriptProcessorProvider(XlScriptProcessorProvider scriptProcessorProvider) {
+            this.scriptProcessorProvider = scriptProcessorProvider;
             return this;
         }
 
@@ -211,14 +195,7 @@ public class XlScriptReader extends XlBeanReader {
          */
         public XlScriptReader build() {
             XlScriptReader reader = new XlScriptReader(builder.build());
-            if (this.baseInstance != null) {
-                reader.singleDefinitionProcessor = new XlScriptSingleDefinitionProcessor(this.baseInstance);
-                reader.tableDefinitionProcessor = new XlScriptTableDefinitionProcessor(this.baseInstance);
-            } else if (this.baseScript != null) {
-                reader.singleDefinitionProcessor = new XlScriptSingleDefinitionProcessor(this.baseScript);
-                reader.tableDefinitionProcessor = new XlScriptTableDefinitionProcessor(this.baseScript);
-            }
-            reader.baseBindings = baseBindings;
+            reader.scriptProcessorProvider = this.scriptProcessorProvider;
             return reader;
         }
     }

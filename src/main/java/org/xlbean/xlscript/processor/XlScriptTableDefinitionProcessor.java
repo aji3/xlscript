@@ -11,6 +11,7 @@ import org.xlbean.definition.Definition;
 import org.xlbean.definition.TableDefinition;
 import org.xlbean.util.Accessors;
 import org.xlbean.util.XlBeanFactory;
+import org.xlbean.xlscript.script.XlScriptFactory;
 
 /**
  * Evaluate XlBean values loaded by TableDefinition as Groovy Script.
@@ -20,16 +21,22 @@ import org.xlbean.util.XlBeanFactory;
  */
 public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor {
 
-    public XlScriptTableDefinitionProcessor() {}
+    public static final String CONTEXT_KEY_LIST_CURRENT_OBJECT = "$it";
+    public static final String CONTEXT_KEY_LIST_CURRENT_INDEX = "$index";
 
-    public XlScriptTableDefinitionProcessor(String baseScript) {
-        super(baseScript);
+    private ScriptOrderOptionProcessor scriptOrderOptionProcessor = new ScriptOrderOptionProcessor();
+
+    public XlScriptTableDefinitionProcessor(XlScriptFactory scriptProvider) {
+        super(scriptProvider);
     }
 
-    public XlScriptTableDefinitionProcessor(Object baseInstance) {
-        super(baseInstance);
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.xlbean.xlscript.processor.XlScriptProcessor#process(org.xlbean.definition
+     * .Definition, java.util.Map, java.util.Map, java.util.Map)
+     */
     @Override
     @SuppressWarnings("unchecked")
     public void process(Definition definition,
@@ -64,6 +71,8 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
             } else {
                 resultElem = resultDataList.get(i);
             }
+            optionalMap.put(CONTEXT_KEY_LIST_CURRENT_OBJECT, elem);
+            optionalMap.put(CONTEXT_KEY_LIST_CURRENT_INDEX, i);
             evalInternal(tableDefinition, excel, elem, result, resultElem, optionalMap, optionProcessor);
         }
     }
@@ -80,7 +89,7 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
             .getAttributes()
             .values()
             .stream()
-            .sorted(Comparator.comparing(AbstractXlScriptProcessor::getScriptOrder))
+            .sorted(Comparator.comparing(scriptOrderOptionProcessor::getScriptOrder))
             .forEach(columnDefinition ->
         {
                 Object value = Accessors.getValue(columnDefinition.getName(), originalElement);
@@ -94,7 +103,7 @@ public class XlScriptTableDefinitionProcessor extends AbstractXlScriptProcessor 
                     }
                     tmpOptionalMap.putAll(resultBean);
                     tmpOptionalMap.putAll(resultElement);
-                    Object evaluatedValue = evaluate((String) value, originalBean, originalElement, tmpOptionalMap);
+                    Object evaluatedValue = evaluate((String) value, originalBean, tmpOptionalMap);
                     if (!value.equals(evaluatedValue)) {
                         Accessors.setValue(columnDefinition.getName(), evaluatedValue, resultElement);
                     }

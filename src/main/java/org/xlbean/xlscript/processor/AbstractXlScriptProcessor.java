@@ -1,5 +1,7 @@
 package org.xlbean.xlscript.processor;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -7,7 +9,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xlbean.definition.Definition;
-import org.xlbean.xlscript.util.XlScript;
+import org.xlbean.xlscript.script.XlScriptFactory;
 
 /**
  * Abstract class for XlScriptProcessors which executes XlBean values as Groovy
@@ -16,79 +18,33 @@ import org.xlbean.xlscript.util.XlScript;
  * @author tanikawa
  *
  */
-public abstract class AbstractXlScriptProcessor {
-
-    public static final String OPTION_SCRIPTORDER = "scriptOrder";
-    public static final int DEFAULT_SCRIPTORDER = 1000;
-
-    /**
-     * Get value from {@code excel} based on {@code definition}, evaluate the value
-     * and set the result to {@code result}.
-     * 
-     * <p>
-     * By default, {@link #evaluate(String, Map, Map, Map)} is used for evaluation.
-     * </p>
-     * 
-     * <p>
-     * Key-Values in {@code optionalMap} will be added to bindings on evaluation.
-     * </p>
-     * 
-     * @param definition
-     * @param excel
-     * @param optionalMap
-     * @param result
-     */
-    abstract public void process(
-            Definition definition,
-            Map<String, Object> excel,
-            Map<String, Object> optionalMap,
-            Map<String, Object> result);
+public abstract class AbstractXlScriptProcessor implements XlScriptProcessor {
 
     public static final String CONTEXT_KEY_EXCEL = "$excel";
-    public static final String CONTEXT_KEY_LIST_CURRENT_OBJECT = "$it";
 
     private static Logger log = LoggerFactory.getLogger(AbstractXlScriptProcessor.class);
+    private static final Pattern MATCHER = Pattern.compile("^`[^`]*`$");
+    private XlScriptFactory scriptProvider;
 
-    private static final Pattern MATCHER = Pattern.compile("`[^`]*`");
-
-    private String baseScript;
-    private Object baseInstance;
-
-    public AbstractXlScriptProcessor() {}
-
-    /**
-     * Constructor to set base script which will be accessible from all scripts.
-     * 
-     * <p>
-     * For instance, if {@code baseScript} is "def testMethod(String str) {'hello '
-     * + str}", then any script can call "testMethod('test') // it will return
-     * 'hello test'"
-     * </p>
-     * 
-     * @param baseScript
-     */
-    public AbstractXlScriptProcessor(String baseScript) {
-        this.baseScript = baseScript;
-    }
-
-    /**
-     * Constructor to set base instance which will be accessible from all scripts.
-     * 
-     * <p>
-     * For instance, if the class of the instance has "public String
-     * testMethod(String str)", then scripts can call testMethod('some value').
-     * </p>
-     * 
-     * @param baseInstance
-     */
-    public AbstractXlScriptProcessor(Object baseInstance) {
-        this.baseInstance = baseInstance;
+    public AbstractXlScriptProcessor(XlScriptFactory scriptProvider) {
+        this.scriptProvider = scriptProvider;
     }
 
     protected boolean isScript(String markedScript) {
         return trimIfScript(markedScript) != null;
     }
 
+    /**
+     * Returns actual script with "`" trimmed.
+     * 
+     * <p>
+     * If given {@code markedScript} doesn't match script format, then it returns
+     * null.
+     * </p>
+     * 
+     * @param markedScript
+     * @return
+     */
     protected String trimIfScript(String markedScript) {
         if (MATCHER.matcher(markedScript).matches()) {
             return markedScript.substring(1, markedScript.length() - 1);
@@ -118,47 +74,57 @@ public abstract class AbstractXlScriptProcessor {
      * @param listElement
      * @return
      */
-    protected Object evaluate(String markedScript, Map<String, Object> excel, Map<String, Object> listElement,
-            Map<String, Object> optional) {
+    protected Object evaluate(String markedScript, Map<String, Object> excel, Map<String, Object> optional) {
         String script = trimIfScript(markedScript);
-        log.debug("Execute script: {}", script);
-        Map<String, Object> map = new XlScriptBindingsBuilder().excel(excel).it(listElement).putAll(optional).build();
-        log.debug("Script context: {}", map);
+        log.debug("- Script: {}", script);
+        Map<String, Object> map = new XlScriptBindingsBuilder().excel(excel).putAll(optional).build();
+        log.debug("-- Script context: {}", map);
         Object evaluatedValue = null;
-        if (baseInstance != null) {
-            evaluatedValue = new XlScript(baseInstance).evaluate(script, map);
-        } else if (baseScript != null) {
-            evaluatedValue = new XlScript(baseScript).evaluate(script, map);
-        } else {
-            evaluatedValue = new XlScript().evaluate(script, map);
+        try {
+            evaluatedValue = scriptProvider.getXlScript(script).execute(map);
+        } catch (Exception e) {
+            log.error("----Error occured during evaluating script");
+            log.error(script);
+            StringWriter writer = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(writer);
+            e.printStackTrace(printWriter);
+            log.error("----EXCEPTION FOR SCRIPT----START-----------------------------");
+            log.error(writer.toString());
+            log.error("----EXCEPTION FOR SCRIPT----END  -----------------------------");
         }
         log.debug("Script result: {}", evaluatedValue);
         return evaluatedValue;
     }
 
-    /**
-     * Get script order from given {@code definition}.
-     * 
-     * If {@code definition} don't have "scriptOrder" option, then return 1000 as
-     * the default value.
-     * 
-     * @param definition
-     * @return
-     */
-    public static int getScriptOrder(Definition definition) {
-        String scriptOrder = definition.getOptions().getOption(OPTION_SCRIPTORDER);
-        if (scriptOrder == null) {
-            return DEFAULT_SCRIPTORDER;
-        } else {
-            try {
-                return Integer.parseInt(scriptOrder);
-            } catch (NumberFormatException e) {
-                // ignore exception and return default value
-                log.warn(
-                    "Invalid scriptOrder value. Must be integer value. [{}:{}]",
-                    definition.getName(),
-                    scriptOrder);
+    public static class ScriptOrderOptionProcessor {
+
+        public static final String OPTION_SCRIPTORDER = "scriptOrder";
+        public static final int DEFAULT_SCRIPTORDER = 1000;
+
+        /**
+         * Get script order from given {@code definition}.
+         * 
+         * If {@code definition} don't have "scriptOrder" option, then return 1000 as
+         * the default value.
+         * 
+         * @param definition
+         * @return
+         */
+        public int getScriptOrder(Definition definition) {
+            String scriptOrder = definition.getOptions().getOption(OPTION_SCRIPTORDER);
+            if (scriptOrder == null) {
                 return DEFAULT_SCRIPTORDER;
+            } else {
+                try {
+                    return Integer.parseInt(scriptOrder);
+                } catch (NumberFormatException e) {
+                    // ignore exception and return default value
+                    log.warn(
+                        "Invalid scriptOrder value. Must be integer value. [{}:{}]",
+                        definition.getName(),
+                        scriptOrder);
+                    return DEFAULT_SCRIPTORDER;
+                }
             }
         }
     }
@@ -167,12 +133,8 @@ public abstract class AbstractXlScriptProcessor {
         private Map<String, Object> bindingsMap = new HashMap<>();
 
         public XlScriptBindingsBuilder excel(Map<String, Object> excel) {
-            putAndPutAll(CONTEXT_KEY_EXCEL, excel);
-            return this;
-        }
-
-        public XlScriptBindingsBuilder it(Map<String, Object> it) {
-            putAndPutAll(CONTEXT_KEY_LIST_CURRENT_OBJECT, it);
+            bindingsMap.putAll(excel);
+            bindingsMap.put(CONTEXT_KEY_EXCEL, excel);
             return this;
         }
 
@@ -189,15 +151,6 @@ public abstract class AbstractXlScriptProcessor {
                 return this;
             }
             bindingsMap.putAll(map);
-            return this;
-        }
-
-        private XlScriptBindingsBuilder putAndPutAll(String key, Map<String, Object> map) {
-            if (key == null || map == null) {
-                return this;
-            }
-            bindingsMap.putAll(map);
-            bindingsMap.put(key, map);
             return this;
         }
 
