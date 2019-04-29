@@ -2,8 +2,10 @@ package org.xlbean.xlscript.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +16,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import groovy.lang.GString;
+
 public class JSON {
+
+    private static List<Class<?>> WRAPPERCLASSES = Arrays
+        .asList(
+            Boolean.class,
+            Byte.class,
+            Character.class,
+            Double.class,
+            Float.class,
+            Integer.class,
+            Long.class,
+            Short.class);
 
     public static String stringify(Object data) {
         Object d = convertToStringifyableObject(data, new LinkedList<>());
@@ -44,19 +59,26 @@ public class JSON {
             stack.push(data);
         }
         Object ret = null;
-        if (ValueConverters.canConvert(data.getClass())) {
-            ret = ValueConverters.getValueConverter(data.getClass()).toString(data);
+        if (data.getClass().isPrimitive() || WRAPPERCLASSES.contains(data.getClass())) {
+            ret = data;
         } else if (data instanceof Map) {
-            Map<Object, Object> map = new HashMap<>();
-            ((Map<Object, Object>) data).entrySet().forEach(
-                entry -> map.put(
-                    convertToStringifyableObject(entry.getKey(), stack),
-                    convertToStringifyableObject(entry.getValue(), stack)));
+            Map<Object, Object> map = createMap(data);
+            ((Map<Object, Object>) data)
+                .entrySet()
+                .forEach(
+                    entry -> map
+                        .put(
+                            convertToStringifyableObject(entry.getKey(), stack),
+                            convertToStringifyableObject(entry.getValue(), stack)));
             ret = map;
         } else if (data instanceof List) {
             List<Object> list = new ArrayList<>();
             ((List<Object>) data).forEach(elem -> list.add(convertToStringifyableObject(elem, stack)));
             ret = list;
+        } else if (data instanceof GString) {
+            ret = data.toString();
+        } else if (ValueConverters.canConvert(data.getClass())) {
+            ret = ValueConverters.getValueConverter(data.getClass()).toString(data);
         } else {
             ret = "DROPPED DUE TO INCONVERTABLE OBJECT: " + data.getClass();
         }
@@ -64,6 +86,14 @@ public class JSON {
             stack.pop();
         }
         return ret;
+    }
+    
+    private static Map<Object, Object> createMap(Object map) {
+        if (map instanceof LinkedHashMap) {
+            return new LinkedHashMap<>();
+        } else {
+            return new HashMap<>();
+        }
     }
 
     public static Object parse(String jsonStr) {
