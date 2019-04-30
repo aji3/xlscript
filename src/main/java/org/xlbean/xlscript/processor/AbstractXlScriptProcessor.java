@@ -138,7 +138,7 @@ public abstract class AbstractXlScriptProcessor implements XlScriptProcessor {
             return this;
         }
 
-        public XlScriptBindingsBuilder put(String key, Map<String, Object> map) {
+        public XlScriptBindingsBuilder put(String key, Object map) {
             if (key == null) {
                 return this;
             }
