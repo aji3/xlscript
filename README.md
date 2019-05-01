@@ -3,9 +3,9 @@
 [![Build Status](https://travis-ci.org/aji3/xlscript.svg?branch=master)](https://travis-ci.org/aji3/xlscript)
 [![Coverage Status](https://coveralls.io/repos/github/aji3/xlscript/badge.svg?branch=master)](https://coveralls.io/github/aji3/xlscript?branch=master)
 
-Java utility to evaluate values defined in Excel sheet as Groovy script and set the result to Map.
+Java utility to read values in Excel sheet based on the definition in the Excel sheet itself, and evaluate the values as Groovy script if necessary.
 
-This library is a thin wrapper of [xlbean](https://github.com/aji3/xlbean), so that basic usage follows the same as xlbean.
+This library is a thin wrapper of [xlbean](https://github.com/aji3/xlbean), so that basic usage follows it.
 
 ## 1. Dependency
 
@@ -36,28 +36,57 @@ dependencies {
 }
 ```
 
-## 2. Define Mapping Definition on Excel sheet
+## 2. How to use
 
-Since this library uses xlbean internally to load values from Excel sheet, the way to define data loading is the same as xlbean as explained [here](https://github.com/aji3/xlbean/wiki).
+This library uses xlbean internally to load values from Excel sheet, so definition for data loading is the same as xlbean as explained [here](https://github.com/aji3/xlbean/wiki/Reading-excel-sheet).
 
-Only difference is that values put in back quote will be evaluated as Groovy script. ``` `this is evaluated as groovy script` ```
+Only difference is that values wrapped by back quote is evaluated as Groovy script. For instance, this will write the string to stdout: ``` `println "this is evaluated as groovy script"` ```. 
 
-1. Define name for each column of table in Excel sheet.
+And important point is that the the values defined by xlbean is accessible from this script.
 
-    Define **"YOUR_TABLE_NAME#YOUR_COLUMN_NAME"** on the row 1 of the corresponding column.
+Let's take the most simple example to explain how it works.
 
-2. Mark the row which the data of the table starts from.
+### STEP1. Define Mapping Definition on Excel sheet
 
-    Input **"YOUR_TABLE_NAME#~(tilda)"** on the column 1 of the corresponding row.
+![Simplest example](https://user-images.githubusercontent.com/23234132/57008300-164bbf80-6c2a-11e9-84d0-a83e01bde81c.png)
 
-3. Mark the sheet as the target to be loaded by this utility.
 
-    Input **"####"** on R1C1.
+In this example, you can see 2 types of definitions.
 
-    ![Example of excel sheet](https://user-images.githubusercontent.com/23234132/29244923-4f5cba56-8002-11e7-929d-617a9ea38d83.png "Excelシートの例")
+1. **Single definition** - for reading a single cell to element of Map instance: 
 
-As shown in the image above, 
+   Define name of field as **"FIELD_NAME"** at both ROW1 and COLUMN1 of the corresponding cell.
 
-## 3. Java Program
+2. **Table definition** -  for reading table to list of Map instances: 
 
+   Define name of columns at the ROW1 as **"TABLE_NAME#COLUMN_NAME"** and define **"TABLE_NAME#~"** at COLUMN1 of the row where the body of the table starts from.
+
+For both example, cells in YELLOW are a simple value cells and cells in ORANGE are the cells with Groovy script.
+
+### STEP2. Write Java Program
+
+```java
+public class XlScriptReadme {
+    public static void main(String[] args) {
+        XlScriptReader reader = new XlScriptReader();
+        XlBean bean = reader.read(new File("readme/example_01.xlsx"));
+        System.out.println(bean);
+    }
+}
+```
+The following text will be written to stdout.
+
+```
+{
+  name=World, 
+  greeting=Hello World!, 
+  greetings=[
+    {name=xlbean, greeting=Hello xlbean!},
+    {name=xlscript, greeting=Hello xlscript!}, 
+    {name=xltemplating, greeting=Hello xltemplating!}
+  ]
+}
+```
+
+As you can see, the back-quoted values are replaced by evaluation result Groovy script.
 
