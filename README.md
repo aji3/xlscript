@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/aji3/xlscript.svg?branch=master)](https://travis-ci.org/aji3/xlscript)
 [![Coverage Status](https://coveralls.io/repos/github/aji3/xlscript/badge.svg?branch=master)](https://coveralls.io/github/aji3/xlscript?branch=master)
 
-Java utility to read values in Excel sheet based on the definition in the Excel sheet itself, and evaluate the values as Groovy script if necessary.
+Java utility to read values in Excel sheet based on the definition in the Excel sheet itself, and evaluate the values as Groovy script.
 
 This library is a thin wrapper of [xlbean](https://github.com/aji3/xlbean), so that basic usage follows it.
 
@@ -52,7 +52,6 @@ Let's take the most simple example to explain how it works.
 
 ![Simplest example](https://user-images.githubusercontent.com/23234132/57008300-164bbf80-6c2a-11e9-84d0-a83e01bde81c.png)
 
-
 In this example, you can see 2 types of definitions.
 
 1. **Single definition** - for reading a single cell to element of Map instance: 
@@ -97,7 +96,6 @@ As you can see, the back-quoted values are replaced by evaluation result Groovy 
 Let's use a example scenario that assumes a simple Division and Employee master table to introduce various different kinds of use cases.
 
 <img src="https://user-images.githubusercontent.com/23234132/57052259-38dce780-6cc1-11e9-9fc8-9a50f27d1cbe.png" width=80%> 
-
 
 ## Basic Use Cases
 
