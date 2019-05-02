@@ -7,6 +7,8 @@ Java utility to read values in Excel sheet based on the definition in the Excel 
 
 This library is a thin wrapper of [xlbean](https://github.com/aji3/xlbean), so that basic usage follows it.
 
+# Getting Started
+
 ## 1. Dependency
 
 **For Maven**
