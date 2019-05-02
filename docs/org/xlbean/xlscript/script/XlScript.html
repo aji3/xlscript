@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10};
+var methods = {"i0":10,"i1":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -48,10 +48,10 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li>Prev&nbsp;Class</li>
-<li>Next&nbsp;Class</li>
+<li><a href="../../../../org/xlbean/xlscript/script/XlScriptFactory.html" title="class in org.xlbean.xlscript.script"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
-<li><a href="../../../../index.html?org/xlbean/xlscript/util/XlScript.html" target="_top">Frames</a></li>
+<li><a href="../../../../index.html?org/xlbean/xlscript/script/XlScript.html" target="_top">Frames</a></li>
 <li><a href="XlScript.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_top">
@@ -90,7 +90,7 @@ var activeTableTab = "activeTableTab";
 <!-- ========= END OF TOP NAVBAR ========= -->
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="subTitle">org.xlbean.xlscript.util</div>
+<div class="subTitle">org.xlbean.xlscript.script</div>
 <h2 title="Class XlScript" class="title">Class XlScript</h2>
 </div>
 <div class="contentContainer">
@@ -98,7 +98,7 @@ var activeTableTab = "activeTableTab";
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>org.xlbean.xlscript.util.XlScript</li>
+<li>org.xlbean.xlscript.script.XlScript</li>
 </ul>
 </li>
 </ul>
@@ -128,21 +128,8 @@ extends java.lang.Object</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../org/xlbean/xlscript/util/XlScript.html#XlScript--">XlScript</a></span>()</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../org/xlbean/xlscript/util/XlScript.html#XlScript-java.lang.Object-">XlScript</a></span>(java.lang.Object&nbsp;baseInstance)</code>
-<div class="block">Set given <code>baseInstance</code> to member field and create GroovyShell
- instance with DelegatingScript for scriptBaseClass of CompilerConfiguration
- in order to use <code>baseInstance</code> on evaluation.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../org/xlbean/xlscript/util/XlScript.html#XlScript-java.lang.String-">XlScript</a></span>(java.lang.String&nbsp;baseScript)</code>
-<div class="block">Set given <code>baseScript</code> to member field and create GroovyShell instance
- with DelegatingScript for scriptBaseClass of CompilerConfiguration in order
- to use <code>baseScript</code> on evaluation.</div>
-</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../org/xlbean/xlscript/script/XlScript.html#XlScript-groovy.lang.Script-java.util.Map-">XlScript</a></span>(groovy.lang.Script&nbsp;script,
+        java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;baseBindings)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -161,19 +148,15 @@ extends java.lang.Object</pre>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>java.lang.Object</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/xlbean/xlscript/util/XlScript.html#evaluate-java.lang.String-">evaluate</a></span>(java.lang.String&nbsp;scriptStr)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/xlbean/xlscript/script/XlScript.html#execute--">execute</a></span>()</code>
+<div class="block">Execute wrapped Script instance.</div>
+</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>java.lang.Object</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/xlbean/xlscript/util/XlScript.html#evaluate-java.lang.String-java.util.Map-">evaluate</a></span>(java.lang.String&nbsp;scriptStr,
-        java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;bindings)</code>
-<div class="block">Evaluate <code>sciprtStr</code> as Groovy script with <code>bindings</code> set to
- script property.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/xlbean/xlscript/script/XlScript.html#execute-java.util.Map-">execute</a></span>(java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;bindings)</code>
+<div class="block">Execute wrapped Script instance with <code>bindings</code>.</div>
 </td>
-</tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code>java.lang.Object</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/xlbean/xlscript/util/XlScript.html#getProperty-java.lang.String-">getProperty</a></span>(java.lang.String&nbsp;key)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -197,45 +180,14 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="XlScript--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>XlScript</h4>
-<pre>public&nbsp;XlScript()</pre>
-</li>
-</ul>
-<a name="XlScript-java.lang.String-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>XlScript</h4>
-<pre>public&nbsp;XlScript(java.lang.String&nbsp;baseScript)</pre>
-<div class="block">Set given <code>baseScript</code> to member field and create GroovyShell instance
- with DelegatingScript for scriptBaseClass of CompilerConfiguration in order
- to use <code>baseScript</code> on evaluation.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>baseScript</code> - </dd>
-</dl>
-</li>
-</ul>
-<a name="XlScript-java.lang.Object-">
+<a name="XlScript-groovy.lang.Script-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>XlScript</h4>
-<pre>public&nbsp;XlScript(java.lang.Object&nbsp;baseInstance)</pre>
-<div class="block">Set given <code>baseInstance</code> to member field and create GroovyShell
- instance with DelegatingScript for scriptBaseClass of CompilerConfiguration
- in order to use <code>baseInstance</code> on evaluation.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>baseInstance</code> - </dd>
-</dl>
+<pre>public&nbsp;XlScript(groovy.lang.Script&nbsp;script,
+                java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;baseBindings)</pre>
 </li>
 </ul>
 </li>
@@ -246,31 +198,14 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="evaluate-java.lang.String-">
+<a name="execute--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>evaluate</h4>
-<pre>public&nbsp;java.lang.Object&nbsp;evaluate(java.lang.String&nbsp;scriptStr)</pre>
-</li>
-</ul>
-<a name="evaluate-java.lang.String-java.util.Map-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>evaluate</h4>
-<pre>public&nbsp;java.lang.Object&nbsp;evaluate(java.lang.String&nbsp;scriptStr,
-                                 java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;bindings)</pre>
-<div class="block">Evaluate <code>sciprtStr</code> as Groovy script with <code>bindings</code> set to
- script property.
- 
- <p>
- If <code>baseScript</code> or <code>baseInstance</code> is set, they are configured to
- delegate of Script. For instance, when baseScript has a method add(v1, v2),
- then scriptStr can invoke this method.
- </p></div>
+<h4>execute</h4>
+<pre>public&nbsp;java.lang.Object&nbsp;execute()</pre>
+<div class="block">Execute wrapped Script instance.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>scriptStr</code> - </dd>
@@ -279,13 +214,20 @@ extends java.lang.Object</pre>
 </dl>
 </li>
 </ul>
-<a name="getProperty-java.lang.String-">
+<a name="execute-java.util.Map-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>getProperty</h4>
-<pre>public&nbsp;java.lang.Object&nbsp;getProperty(java.lang.String&nbsp;key)</pre>
+<h4>execute</h4>
+<pre>public&nbsp;java.lang.Object&nbsp;execute(java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;bindings)</pre>
+<div class="block">Execute wrapped Script instance with <code>bindings</code>.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>scriptStr</code> - </dd>
+<dd><code>bindings</code> - </dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+</dl>
 </li>
 </ul>
 </li>
@@ -316,10 +258,10 @@ extends java.lang.Object</pre>
 <div class="subNav">
 <ul class="navList">
 <li>Prev&nbsp;Class</li>
-<li>Next&nbsp;Class</li>
+<li><a href="../../../../org/xlbean/xlscript/script/XlScriptFactory.html" title="class in org.xlbean.xlscript.script"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
-<li><a href="../../../../index.html?org/xlbean/xlscript/util/XlScript.html" target="_top">Frames</a></li>
+<li><a href="../../../../index.html?org/xlbean/xlscript/script/XlScript.html" target="_top">Frames</a></li>
 <li><a href="XlScript.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_bottom">

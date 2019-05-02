@@ -47,7 +47,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/xlbean/xlscript/XlScriptReader.XlScriptReaderBuilder.html" title="class in org.xlbean.xlscript"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../org/xlbean/xlscript/XlScriptReader.Builder.html" title="class in org.xlbean.xlscript"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.SkipScriptOptionProcessor.html" title="class in org.xlbean.xlscript"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
@@ -134,7 +134,9 @@ extends org.xlbean.reader.XlBeanReaderContext</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.SkipScriptOptionProcessor.html" title="class in org.xlbean.xlscript">XlScriptReaderContext.SkipScriptOptionProcessor</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.SkipScriptOptionProcessor.html" title="class in org.xlbean.xlscript">XlScriptReaderContext.SkipScriptOptionProcessor</a></span></code>
+<div class="block">Process skipScript option.</div>
+</td>
 </tr>
 </table>
 </li>
@@ -151,9 +153,7 @@ extends org.xlbean.reader.XlBeanReaderContext</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#XlScriptReaderContext-org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor-org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor-java.util.Map-">XlScriptReaderContext</a></span>(<a href="../../../org/xlbean/xlscript/processor/XlScriptSingleDefinitionProcessor.html" title="class in org.xlbean.xlscript.processor">XlScriptSingleDefinitionProcessor</a>&nbsp;singleDefinitionProcessor,
-                     <a href="../../../org/xlbean/xlscript/processor/XlScriptTableDefinitionProcessor.html" title="class in org.xlbean.xlscript.processor">XlScriptTableDefinitionProcessor</a>&nbsp;tableDefinitionProcessor,
-                     java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;baseBindings)</code>&nbsp;</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#XlScriptReaderContext-org.xlbean.xlscript.processor.XlScriptProcessorProvider-">XlScriptReaderContext</a></span>(<a href="../../../org/xlbean/xlscript/processor/XlScriptProcessorProvider.html" title="class in org.xlbean.xlscript.processor">XlScriptProcessorProvider</a>&nbsp;scriptProcessorProvider)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -185,11 +185,15 @@ extends org.xlbean.reader.XlBeanReaderContext</pre>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>java.util.Map&lt;java.lang.String,java.lang.Object&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#eval-java.lang.String-java.util.Map-">eval</a></span>(java.lang.String&nbsp;name,
-    java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;optionalMap)</code>&nbsp;</td>
+    java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;optionalMap)</code>
+<div class="block">Evaluate values in XlBean defined by a Definition with <code>name</code>.</div>
+</td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#evalAll--">evalAll</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.html#evalAll--">evalAll</a></span>()</code>
+<div class="block">Evaluate all values in XlBean defined by the Definitions.</div>
+</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -220,15 +224,13 @@ extends org.xlbean.reader.XlBeanReaderContext</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="XlScriptReaderContext-org.xlbean.xlscript.processor.XlScriptSingleDefinitionProcessor-org.xlbean.xlscript.processor.XlScriptTableDefinitionProcessor-java.util.Map-">
+<a name="XlScriptReaderContext-org.xlbean.xlscript.processor.XlScriptProcessorProvider-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>XlScriptReaderContext</h4>
-<pre>public&nbsp;XlScriptReaderContext(<a href="../../../org/xlbean/xlscript/processor/XlScriptSingleDefinitionProcessor.html" title="class in org.xlbean.xlscript.processor">XlScriptSingleDefinitionProcessor</a>&nbsp;singleDefinitionProcessor,
-                             <a href="../../../org/xlbean/xlscript/processor/XlScriptTableDefinitionProcessor.html" title="class in org.xlbean.xlscript.processor">XlScriptTableDefinitionProcessor</a>&nbsp;tableDefinitionProcessor,
-                             java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;baseBindings)</pre>
+<pre>public&nbsp;XlScriptReaderContext(<a href="../../../org/xlbean/xlscript/processor/XlScriptProcessorProvider.html" title="class in org.xlbean.xlscript.processor">XlScriptProcessorProvider</a>&nbsp;scriptProcessorProvider)</pre>
 </li>
 </ul>
 </li>
@@ -263,6 +265,13 @@ extends org.xlbean.reader.XlBeanReaderContext</pre>
 <li class="blockList">
 <h4>evalAll</h4>
 <pre>public&nbsp;void&nbsp;evalAll()</pre>
+<div class="block">Evaluate all values in XlBean defined by the Definitions.
+ 
+ <p>
+ Iterate over all Definitions, first evaluate skipScript option and skip the
+ Definition if true, sort definitions by scriptOrder option then evaluate as
+ Groovy script.
+ </p></div>
 </li>
 </ul>
 <a name="eval-java.lang.String-">
@@ -282,6 +291,18 @@ extends org.xlbean.reader.XlBeanReaderContext</pre>
 <h4>eval</h4>
 <pre>public&nbsp;java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;eval(java.lang.String&nbsp;name,
                                                              java.util.Map&lt;java.lang.String,java.lang.Object&gt;&nbsp;optionalMap)</pre>
+<div class="block">Evaluate values in XlBean defined by a Definition with <code>name</code>.
+ 
+ <p>
+ <code>optionalMap</code> will be registered to Bindings when evaluating Groovy
+ script.
+ </p></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>name</code> - </dd>
+<dd><code>optionalMap</code> - </dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+</dl>
 </li>
 </ul>
 </li>
@@ -311,7 +332,7 @@ extends org.xlbean.reader.XlBeanReaderContext</pre>
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../org/xlbean/xlscript/XlScriptReader.XlScriptReaderBuilder.html" title="class in org.xlbean.xlscript"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../org/xlbean/xlscript/XlScriptReader.Builder.html" title="class in org.xlbean.xlscript"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../../org/xlbean/xlscript/XlScriptReaderContext.SkipScriptOptionProcessor.html" title="class in org.xlbean.xlscript"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
