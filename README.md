@@ -496,11 +496,20 @@ By default any cell with back-quoted values will be evaluated as Groovy script a
 
 Basically the purpose of skipping is to invoke it later using `XlScriptReaderContext#eval(String definitionName, Map context)`.
 
+### Available values
+
+- true: skip evaluation
+- false(default): execute evaluation 
+
 ## Option: scriptOrder - explicitly define the order of the evaluation
+
+### Description
 
 By default the order of the evaluation of back-quoted values are from left to right and top to bottom. You can change this order by using `scriptOrder` option. The definitions without this option has implicit scriptOrder value of 1000, so that if you specify any number larger than this, that script will be evaluated after other definitions and vise versa.
 
+### Available values
 
+Any integer: The default value is 1000
 
 
 
