@@ -3,9 +3,11 @@
 [![Build Status](https://travis-ci.org/aji3/xlscript.svg?branch=master)](https://travis-ci.org/aji3/xlscript)
 [![Coverage Status](https://coveralls.io/repos/github/aji3/xlscript/badge.svg?branch=master)](https://coveralls.io/github/aji3/xlscript?branch=master)
 
-Java utility to read values in Excel sheet based on the definition in the Excel sheet itself, and evaluate the values as Groovy script.
+Java utility to read Excel and evaluate the values as Groovy script. 
+The characteristic of this library is to define mapping definition from excel to object in excel itself.
 
 This library is a thin wrapper of [xlbean](https://github.com/aji3/xlbean), so that basic usage follows it.
+Difference is that it can evaluate back-quoted values as Groovy script and set the evaluation result to mapping object.
 
 # Getting Started
 
@@ -40,7 +42,7 @@ dependencies {
 
 ## 2. How to use
 
-This library uses xlbean internally to load values from Excel sheet, so definition for data loading is the same as xlbean as explained [here](https://github.com/aji3/xlbean/wiki/Reading-excel-sheet).
+This library uses xlbean internally to load values from Excel sheet, so definition for data loading is the same as xlbean [as explained here](https://github.com/aji3/xlbean/wiki/Reading-excel-sheet).
 
 Only difference is that values wrapped by back quote is evaluated as Groovy script. For instance, this will write the string to stdout: ``` `println "this is evaluated as groovy script"` ```. 
 
@@ -54,15 +56,17 @@ Let's take the most simple example to explain how it works.
 
 In this example, you can see 2 types of definitions.
 
-1. **Single definition** - for reading a single cell to element of Map instance: 
+1. **Single definition** - for reading single cell and map to element of Map instance: 
 
-   Define name of field as **"FIELD_NAME"** at both ROW1 and COLUMN1 of the corresponding cell.
+   In the diagram, 2 fields **"name"** and **"greeting"** are the example of Single definition.
+   In this way, define name of field as **"FIELD_NAME"** at both ROW1 and COLUMN1 of the corresponding cell.
 
 2. **Table definition** -  for reading table to list of Map instances: 
 
-   Define name of columns at the ROW1 as **"TABLE_NAME#COLUMN_NAME"** and define **"TABLE_NAME#~"** at COLUMN1 of the row where the body of the table starts from.
+   In the diagram, **"greetings#name"** and **"greetings#greeting"** are the definitions for each field of the element, and **"greetings#~"** is the row where the body of the table starts from.
+   In this way, define name of columns at the ROW1 as **"TABLE_NAME#COLUMN_NAME"** and define **"TABLE_NAME#~"** at COLUMN1 of the row where the body of the table starts from.
 
-For both example, cells in YELLOW are simple value cells and cells in ORANGE are the cells with Groovy script.
+For both examples, cells in YELLOW are simple value cells and cells in ORANGE are the cells with Groovy script.
 
 ### STEP2. Write Java Program
 
@@ -91,6 +95,51 @@ The following text will be written to stdout.
 
 As you can see, the back-quoted values are replaced by evaluation result Groovy script.
 
+# Options
+
+**Option** is a concept of **xlbean** to change behavior of Excel loaders. It can be added to definition by `someDefinition?optionKey=optionValue`. Besides [options provided by **xlbean**](https://github.com/aji3/xlbean/wiki/Option), below are the options added for **xlscript**. 
+
+## Option: skipScript - Skip evaluation of Grooy script
+
+### Description
+
+By default any cell with back-quoted values will be evaluated as Groovy script at the time of reading Excel. Using `skipScript=true`, you can skip this evaluation and get the back-quoted value as it is.
+
+Basically the purpose of skipping is to invoke it later by using `XlScriptReaderContext#eval(String definitionName, Map context)`.
+
+### Available values
+
+- true: skip evaluation
+- false(default): execute evaluation 
+
+## Option: scriptOrder - explicitly define the order of the evaluation
+
+### Description
+
+By default the order of the evaluation of back-quoted values are from left to right and top to bottom. You can change this order by using `scriptOrder` option. The definitions without this option has implicit scriptOrder value of 1000, so that if you specify any number larger than this, that script will be evaluated after other definitions and vise versa.
+
+### Available values
+
+Any integer: The default value is 1000
+
+# Major Java APIs
+
+## `XlScriptReader` - Core class for reading Excel
+
+`org.xlbean.xlscript.XlScriptReader` is the core class for reading Excel.
+This class has mainly 2 different methods `read` and `readContext`. 
+
+* `read` returns `XlBean` instance which is an extension of Map with Excel data populated based on the definitions.
+* `readContext` return `XlScriptReaderContext` instance which contains `XlBean` instance and `Definition`. 
+
+Its behavior can be customized by `org.xlbean.xlscript.XlScriptReader.Builder`. Most common use case of the Builder is to add baseBindings to XlScriptReader which allows Groovy script in Excel to invoke logics outside of Excel.
+
+## `XlScriptReaderContext` - Access Definitions and Logics in Excel
+
+This context contains `XlBean` instance and `Definition`.
+Besides, it has method `XlScriptReaderContext#eval(String name, Map context)` to evaluate the fields of `XlBean` by name of the definition. Using together with `skipScript=true`, Groovy script defined in Excel can be invoked from external program.
+
+
 # Use Cases
 
 Let's use a example scenario that assumes a simple Division and Employee master table to introduce various different kinds of use cases.
@@ -101,7 +150,7 @@ Let's use a example scenario that assumes a simple Division and Employee master 
 
 ### Basic-1. Before Groovy... How to read excel sheet
 
-To read these two tables in a Java program, write the definition in ROW1 and COLUMN1 as follows:
+To read these two tables into Java program, write the definition in ROW1 and COLUMN1 as follows:
 The definition method is the same as **xlbean**, so [please refer to xlbean wiki for details.](https://github.com/aji3/xlbean/wiki)
 
 ![image](https://user-images.githubusercontent.com/23234132/57052435-097aaa80-6cc2-11e9-9e97-92bd346c5bb7.png)
@@ -109,11 +158,11 @@ The definition method is the same as **xlbean**, so [please refer to xlbean wiki
 This Excel can be read by the following program.
 
 ```java
-public class XlScriptMain {
+public class XlScriptReadme2 {
     public static void main(String[] args) {
         XlScriptReader reader = new XlScriptReader();
-        XlBean excel = reader.read(new File("demo/demo2.xlsx"));
-        System.out.println(excel);
+        XlBean bean = reader.read(new File("readme/example_02.xlsx"));
+        System.out.println(bean);
     }
 }
 ```
@@ -137,7 +186,7 @@ divisions=[
 }
 ```
 So, first of all, it is an introduction to **xlbean**, which **defines the cells to be read in Excel itself -> It can be defined quickly and it is strong against the change of the format of the table itself!**.
-In this way, it is possible to easily call data on Excel from a Java program, so **you can use structured data existing in Excel very quickly**.
+In this way, it is possible to use data on Excel from Java program very easily, so **you can use structured data existing in Excel very quickly**.
 
 ## Basic-2. Using Groovy
 
@@ -146,8 +195,8 @@ Next, let's look at how to incorporate Groovy.
 Consider the case where **you need the age of the employee** in the sample above.
 This time, the following two points are additionally defined.
 
-- Add the **Age** column next to the **Date of Birth** column and write a Groovy script that asks for the age.
-- Define `fieldType = localdate` in the` dateOfBirth` column. This is because we want to use dateOfBirth field with type `java.time.LocalDate`. This is one of the standard features of **xlbean**.
+- Add the **Age** column next to the **Date of Birth** column and write a Groovy script that calculates the age.
+- Define `fieldType=localdate` in the `dateOfBirth` column. This is because we want to use `dateOfBirth` field with type `java.time.LocalDate`. This is one of the standard features of **xlbean**.
 
 ![image](https://user-images.githubusercontent.com/23234132/57052478-61b1ac80-6cc2-11e9-8ebd-82139c9dd8ba.png)
 
@@ -190,14 +239,16 @@ As you can see, the `age` field has been calculated. Without adding any complexi
 
 Besides using Groovy to calculate values, it can also be used to **define the structure of data.**
 
-Now, let's think about **having a list of members who belong to the division information**. Here we name it `members` in the` division` object.
+Now, let's think about **having a list of members who belong to the division in the division data**. Here we name it `members` in the `division` object for the list.
 
 ![image](https://user-images.githubusercontent.com/23234132/57052634-a2f68c00-6cc3-11e9-85c9-7dda638f22ef.png)
 
 Here is the explanation of the one liner program in the table.
 
 * `employees` points to the list of` employees` defined in this Excel. Since Groovy is evaluated after reading all Excel values, any logic can access all values. (However, you need to be aware of the order of execution of the Groovy logics, which will be discussed later.)
-* For those unfamiliar with Groovy, the `findAll` method is a Groovy standard method that returns a list containing all the elements of the condition that apply to the closure passed in the argument. Also, the syntax is Groovy-specific, so transforming it closer to Java syntax results in:
+* For those unfamiliar with Groovy, here is the description of the Groovy methods and syntaxes. 
+
+  * The `findAll` method is a Groovy standard method that returns a list containing all the elements which matches the condition that is given to the method as closure. Also, the syntax is Groovy-specific, so transforming it closer to Java syntax results in:
 
 ```Groovy
 // Explanation of Groovy syntax
@@ -213,9 +264,9 @@ employees.findAll({it.division == '001'})
 employees.findAll({_it -> _it.division == '001'}) 
 ```
 
-Please refer to Groovy's official [Differences with Java] (http://groovy-lang.org/differences.html) for the syntax of Groovy.
+* * Please refer to Groovy's official [Differences with Java](http://groovy-lang.org/differences.html) for the syntax of Groovy.
 
-* Of course you can use spreadsheet functions when defining this method. In this example, we put a function that combines strings in a solid `` = "` employees.findAll {it.division == '' & C13 & "'}` "``.
+ * Of course you can use spreadsheet functions when defining this method. In this example, we put a function that combines strings in a solid `` = "` employees.findAll {it.division == '' & C13 & "'}` "``.
 
 If you read this Excel **again with the exact same Java code**, the divisions will be output to the console as below.
 
@@ -252,9 +303,9 @@ divisions=[
 
 Thus, data defined in two separate tables in Excel could be combined and displayed by a simple definition.
 
-## Advanced-2. Complete program by Excel only
+## Advanced-2. Create a complete program using only Excel
 
-In the explanation so far, you looked at the result which was written out to standard output by Java program. In other words, the assumed scenario was that **the data defined in Excel was read into a Java program to get used in Java program.**
+In the explanation so far, you looked at the result which was written out to standard output by Java program. In other words, the assumed scenario was that **the data defined in Excel was read into a Java program to get consumed in Java program.**
 However, **the fact that there is data and you can write logic is that it can be a complete program**.
 
 Now, let's think about writing the employee and department information to a file in JSON format.
@@ -263,8 +314,8 @@ Add a sheet and fill in the following:
 
 ![image](https://user-images.githubusercontent.com/23234132/57052816-a3dbed80-6cc4-11e9-9b96-5bc961a4314b.png)
 
-* Description of column C: **"The object ` employees` defined in another sheet is converted to JSON format by `org.xlbean.xscript.util.JSON#stringify` method and set to the `json` field of the n-th element of the list `output`"**
-* Description of column D: **"Writes the value set in the `json` field of the same element (`$it` is an implicit variable of xlscript) to a file named "employees.json". The result for the `write` field of the n-th element of the List `output` is set to `null` because `File#write` returns `void`.**
+* Column C: **"The object ` employees` defined in another sheet is formatted into JSON by `org.xlbean.xscript.util.JSON#stringify` method and set to the `json` field of the n-th element of the list `output`"**
+* Column D: **"Writes the value which is set to the `json` field of the same element (`$it` is an implicit variable of xlscript) to a file named "employees.json". The result for the `write` field of the n-th element of the List `output` is set to `null` because `File#write` returns `void`.**
 * Groovy's execution order is the order in which the definitions are read from left to right, and for horizontal tables, from top to bottom. Also, when there are multiple sheets, it is executed from the left sheet to the right sheet.
 * In this example, it doesn't really matter if you don't specify the order of the script, but if there is a change, you won't run this output before the `employees` side of Groovy is executed, so `scriptOrder = 2000` option is included to ensure that it will be executed after other scripts. By default, it is treated as `scriptOrder = 1000`.
 
@@ -377,13 +428,13 @@ Again, the point is that **the Java program that calls `xlscript` is completely 
 
 ## Advanced-3. Calling external logic from Excel
 
-Up to here, we have demonstrated that **any script can be executed**, thus **it can express any data structure**, and **you can do anything** if you want.
+Up to here, we have demonstrated that **any script can be executed**, thus **it can express any data structure**, and **you can do anything if you want**.
 
 However, the examples so far have been only very simple logic. On the other hand, practical logic requires a program with a certain size or more. But writing medium-sized logic in Excel is basically not possible since there is no IDE support in the first place.
 
 The **xlscript** approach to this problem is **"call external logic from Excel"**.
 
-Let's look at it with the example program.
+Let's take a look at it with the example program.
 As an example of external logic, we are going to use DTO `Employee` class and` EmployeeLogic` class.
 
 Now change the method of creating a `XlScriptReader` instance from a simple `new` to one that uses a` Builder`. At this time, use `Builder#addBaseBinding(String key, Object value)` with `$empLogic` as a key and an instance of `EmployeeLogic` as a value. It enables to call this instance from Excel logic by specifying `$empLogic` variable.
@@ -418,22 +469,22 @@ public class XlScriptReadme3 {
 }
 ```
 
-Calling `$empLogic` from Excel will look like this.
+Logic to call `$empLogic` from Excel will look like this.
 
 ![image](https://user-images.githubusercontent.com/23234132/57056481-d514e780-6cdd-11e9-8b47-53aeaa596b35.png)
 
 The points are as follows.
 
 * You can call methods from Excel by `$empLogic.saveEmployee`.
-* This method receives a `Employee` instance, but employees is a list of `XlBean` instances and can not be passed as it is. By calling `XlBean#of`, we map `XlBean` to an instance of `Employee`. This method is a standard method of ** xlbean **.
-* `$index` is an implicit variable of **xlscript**. When reading a table, return the row number.
+* This method receives a `Employee` instance, but employees is a list of `XlBean` instances and can not be passed as it is. By using `XlBean#of`, we map `XlBean` to an instance of `Employee`. This method is a standard method of ** xlbean **.
+* `$index` is an implicit variable of **xlscript**. This variable has a row number when reading a table.
 
 Thus, it was possible to **easily integrate programs implemented in a general development process into Excel. **This enables complex and robust programs and natural integration.
 
-## Advanced-4. Calling logics defined in Excel from external program
+## Advanced-4. Define logics in Excel and call it from external program
 
-All the samples so far used Groovy to process the data defined in Excel.
-This is the last example, but let's define the logic, not the data.
+All the examples so far used Groovy to process the data defined in Excel and when a simple read step is done, everything is evaluated and completed.
+This is the last example, but let's define the logic in Excel for external program to call.
 
 Consider the case where data format conversion is required when sending the `employees` defined above to a certain system.
 The requirement is to convert it into a CSV file with such fields.
@@ -445,8 +496,8 @@ Adding logic that conforms to the requirements to a new column. ("field type" an
 
 The points in this logic are as follows.
 
-* Loading **CSV column names** columns and **Logic** columns into the list `transform`.
-* `transform` has an option `skipScript = true`. This is an option of **xlscript**, which is not to evaluate the string as Groovy script but to keep it as string at the time of reading by `XlScriptReader`. Later, `transform` can be executed from external program by using `XlScriptReaderContext#eval(String name, Map context)`.
+* Loading **CSV Column Name** and **Logic** columns into the list `transform`.
+* `transform` has an option `skipScript=true`. This is an option of **xlscript**, which is not to evaluate the string as Groovy script but to keep it as string at the time of reading by `XlScriptReader`. Later, `transform` can be executed from external program by using `XlScriptReaderContext#eval(String name, Map context)`.
 * For each column of `transform`, the options `toMap=key` and `toMap=value` are defined. This is an option of **xlbean**, which converts List format data into a Map with each columns as key-value.
 * Each logic refers to the variable `in`, which is not defined anywhere on Excel. This is a variable to receive the value from external program later.
  
@@ -462,7 +513,7 @@ public static void main(String[] args) {
         .map(emp ->
         {
             Map<String, Object> additionalContext = new HashMap<>();
-            additionalContext.put("in", emp);
+            additionalContext.put("in", emp); // "in" is defined here
             return context.eval("transform", additionalContext);
         })
         // As defined in Excel, csv field already has concatenated string in it
@@ -475,41 +526,14 @@ public static void main(String[] args) {
 The following is displayed on the standard output.
 
 ```
-Smith　Emma,19900401,29,Marketing
-Johnson　Lian,19981101,20,Human Resources
-Williams　Olivia,19910620,27,Human Resources
-Jones　Noah,19980623,20,Engineering
-Brown　Ava,19960826,22,Marketing
+Smith Emma,19900401,29,Marketing
+Johnson Lian,19981101,20,Human Resources
+Williams Olivia,19910620,27,Human Resources
+Jones Noah,19980623,20,Engineering
+Brown Ava,19960826,22,Marketing
 ```
 
 The point of this sample is that the Groovy script defined in the Excel table can be called as logic, not necessarily from the Java program but also from the Groovy script in Excel. Since an instance of `XlScriptReaderContext` is included in implicit variable `$context`, this logic can also be called from Excel by `$context.eval("transform", [in: employees[0]])`.
-
-# Options
-
-## Option: skipScript - Skip evaluation of Grooy script
-
-### Description
-
-By default any cell with back-quoted values will be evaluated as Groovy script at the time of reading Excel. Using `skipScript=true`, you can skip this evaluation and get the back-quoted value as it is.
-
-Basically the purpose of skipping is to invoke it later using `XlScriptReaderContext#eval(String definitionName, Map context)`.
-
-### Available values
-
-- true: skip evaluation
-- false(default): execute evaluation 
-
-## Option: scriptOrder - explicitly define the order of the evaluation
-
-### Description
-
-By default the order of the evaluation of back-quoted values are from left to right and top to bottom. You can change this order by using `scriptOrder` option. The definitions without this option has implicit scriptOrder value of 1000, so that if you specify any number larger than this, that script will be evaluated after other definitions and vise versa.
-
-### Available values
-
-Any integer: The default value is 1000
-
-
 
 
 
